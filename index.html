@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>Jogo da Consciência Negra</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #ffffff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #game-container {
+      max-width: 600px;
+      margin: 50px auto;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #000000;
+    }
+
+    #options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    #score {
+      font-size: 18px;
+      color: #333333;
+    }
+
+    #restart-button,
+    #submit-button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    #name-input {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    #leaderboard-container {
+      margin-top: 20px;
+    }
+
+    #leaderboard {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #leaderboard th,
+    #leaderboard td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    #leaderboard th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-5" id="game-container">
+    <h1 id="questao" class="mb-4"></h1>
+    <div id="options-container" class="mb-4"></div>
+    <p id="score" class="lead">Pontuação: <span id="score-value">0</span></p>
+    <input type="text" id="name-input" class="form-control mb-4" placeholder="Digite seu nome">
+    <button class="btn btn-success btn-lg" id="submit-button" style="display:none" onclick="enviarPontuacao()">Enviar</button>
+    <button class="btn btn-primary btn-lg" id="restart-button" style="display:none" onclick="reiniciarJogo()">Reiniciar Jogo</button>
+    <div id="leaderboard-container" class="mt-5">
+      <h2>Melhores Pontuações</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Pontuação</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <script>
+    let indiceAtualQuestao = 0;
+    let pontuacao = 0;
+    let nomeJogador = "";
+    const placar = [];
+
+    const elementoQuestao = document.getElementById('questao');
+    const containerOpcoes = document.getElementById('options-container');
+    const elementoPontuacao = document.getElementById('score-value');
+    const botaoReiniciar = document.getElementById('restart-button');
+    const botaoEnviar = document.getElementById('submit-button');
+    const entradaNome = document.getElementById('name-input');
+    const corpoPlacar = document.getElementById('leaderboard-body');
+
+    function mostrarQuestao() {
+      const questaoAtual = questoes[indiceAtualQuestao];
+      elementoQuestao.textContent = questaoAtual.questao;
+      containerOpcoes.innerHTML = '';
+
+      questaoAtual.opcoes.forEach((opcao) => {
+        const botao = document.createElement('button');
+        botao.textContent = opcao;
+        botao.addEventListener('click', () => lidarComResposta(opcao, botao));
+        containerOpcoes.appendChild(botao);
+      });
+    }
+
+    function lidarComResposta(respostaSelecionada, botao) {
+      const questaoAtual = questoes[indiceAtualQuestao];
+
+      for (let i = 0; i < questaoAtual.opcoes.length; i++) {
+        if (questaoAtual.opcoes[i] === questaoAtual.respostaCorreta) {
+          botao.classList.add('btn-success');
+        } else {
+          if (questaoAtual.opcoes[i] === respostaSelecionada) {
+            botao.classList.add('btn-danger');
+          } else {
+            const botoes = containerOpcoes.getElementsByTagName('button');
+            for (let j = 0; j < botoes.length; j++) {
+              if (questaoAtual.opcoes[j] === questaoAtual.respostaCorreta) {
+                botoes[j].classList.add('btn-success');
+                botoes[j].disabled = true;
+              }
+            }
+          }
+        }
+
+        botao.disabled = true;
+      }
+
+      if (respostaSelecionada === questaoAtual.respostaCorreta) {
+        pontuacao++;
+      }
+
+      indiceAtualQuestao++;
+
+      if (indiceAtualQuestao < questoes.length) {
+        setTimeout(() => {
+          resetarEstilosBotoes();
+          mostrarQuestao();
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          resetarEstilosBotoes();
+          fimJogo();
+        }, 1000);
+      }
+
+      atualizarPontuacao();
+    }
+
+    function resetarEstilosBotoes() {
+      const botoes = containerOpcoes.getElementsByTagName('button');
+      for (let i = 0; i < botoes.length; i++) {
+        botoes[i].classList.remove('btn-success', 'btn-danger');
+        botoes[i].disabled = false;
+      }
+    }
+
+    function atualizarPontuacao() {
+      elementoPontuacao.textContent = pontuacao;
+    }
+
+    function fimJogo() {
+      elementoQuestao.textContent = "Fim de jogo!";
+      containerOpcoes.innerHTML = '';
+      botaoReiniciar.style.display = 'block';
+      botaoEnviar.style.display = 'block';
+      entradaNome.style.display = 'block';
+      botaoEnviar.style.display = 'block';
+      atualizarPlacar();
+    }
+
+    function reiniciarJogo() {
+      indiceAtualQuestao = 0;
+      pontuacao = 0;
+      mostrarQuestao();
+      atualizarPontuacao();
+      botaoReiniciar.style.display = 'none';
+      botaoEnviar.style.display = 'none';
+      entradaNome.style.display = 'none';
+      nomeJogador = "";
+      entradaNome.value = "";
+    }
+
+    function enviarPontuacao() {
+      const nomeEntrada = entradaNome.value.trim();
+      if (nomeEntrada !== "") {
+        nomeJogador = nomeEntrada;
+        placar.push({ nome: nomeJogador, pontuacao });
+        placar.sort((a, b) => b.pontuacao - a.pontuacao);
+        atualizarPlacar();
+        reiniciarJogo();
+      }
+    }
+
+    function atualizarPlacar() {
+      corpoPlacar.innerHTML = '';
+
+      placar.forEach((entrada) => {
+        const linha = document.createElement('tr');
+        const nomeCelula = document.createElement('td');
+        const pontuacaoCelula = document.createElement('td');
+
+        nomeCelula.textContent = entrada.nome;
+        pontuacaoCelula.textContent = entrada.pontuacao;
+
+        linha.appendChild(nomeCelula);
+        linha.appendChild(pontuacaoCelula);
+
+        corpoPlacar.appendChild(linha);
+      });
+    }
+
+    // Array de objetos contendo as perguntas, opções e respostas corretas
+    const questoes = [
+      {
+        "questao": "Qual foi o ano em que a escravidão foi oficialmente abolida no Brasil?",
+        "opcoes": ["1822", "1888", "1910", "1930"],
+        "respostaCorreta": "1888"
+      },
+      {
+        "questao": "Qual foi o nome do movimento que defendia o fim gradual da escravidão?",
+        "opcoes": ["Abolicionismo", "Escravagismo", "Libertarismo", "Revolucionismo"],
+        "respostaCorreta": "Abolicionismo"
+      },
+      {
+        "questao": "Qual é o dia da Consciência Negra no Brasil?",
+        "opcoes": ["13 de maio", "20 de novembro", "21 de março", "25 de julho"],
+        "respostaCorreta": "20 de novembro"
+      },
+      {
+        "questao": "Qual é o nome do gênero musical considerado um símbolo da cultura afro-brasileira?",
+        "opcoes": ["Samba", "Forró", "Funk", "Rock"],
+        "respostaCorreta": "Samba"
+      },
+      {
+        "questao": "Qual é o nome do ritual de iniciação em uma religião de matriz africana?",
+        "opcoes": ["Batismo", "Feitura", "Confirmação", "Casamento"],
+        "respostaCorreta": "Feitura"
+      },
+      {
+        "questao": "Quem foi o líder do Quilombo dos Palmares, importante símbolo da resistência contra a escravidão no Brasil?",
+        "opcoes": ["Zumbi", "Ganga Zumba", "Chico Rei", "Machado de Assis"],
+        "respostaCorreta": "Zumbi"
+      },
+      {
+        "questao": "Em que ano a Lei Áurea foi assinada, oficialmente abolindo a escravidão no Brasil?",
+        "opcoes": ["1850", "1888", "1900", "1922"],
+        "respostaCorreta": "1888"
+      },
+      {
+        "questao": "Quem foi a princesa que assinou a Lei Áurea, abolindo a escravidão no Brasil?",
+        "opcoes": ["Princesa Isabel", "Princesa Leopoldina", "Princesa Maria", "Princesa Ana"],
+        "respostaCorreta": "Princesa Isabel"
+      },
+      {
+        "questao": "Quem foi o primeiro escritor negro a entrar para a Academia Brasileira de Letras?",
+        "opcoes": ["Machado de Assis", "Carlos Drummond de Andrade", "Cecília Meireles", "Darcy Ribeiro"],
+        "respostaCorreta": "Machado de Assis"
+      },
+      {
+        "questao": "Qual prato da culinária brasileira tem origem africana?",
+        "opcoes": ["Feijoada", "Acarajé", "Pão de queijo", "Pastel"],
+        "respostaCorreta": "Acarajé"
+      },
+      {
+        "questao": "Qual é o nome do estilo musical brasileiro que combina elementos de samba e jazz?",
+        "opcoes": ["Bossa Nova", "MPB", "Axé", "Funk"],
+        "respostaCorreta": "Bossa Nova"
+      },
+      {
+        "questao": "Qual é o nome da dança afro-brasileira que combina elementos de dança e luta?",
+        "opcoes": ["Samba", "Forró", "Capoeira", "Frevo"],
+        "respostaCorreta": "Capoeira"
+      },
+      {
+        "questao": "Quem foi a ativista dos direitos civis e política brasileira, conhecida por sua luta pelos direitos das mulheres negras?",
+        "opcoes": ["Dandara", "Benedita da Silva", "Chica da Silva", "Leila Gonzalez"],
+        "respostaCorreta": "Benedita da Silva"
+      },
+      {
+        "questao": "Qual é o nome do instrumento musical afro-brasileiro, feito de uma cabaça, um arame e um pedaço de madeira, usado na capoeira?",
+        "opcoes": ["Atabaque", "Agogô", "Berimbau", "Pandeiro"],
+        "respostaCorreta": "Berimbau"
+      },
+      {
+        "questao": "Qual é o nome da religião afro-brasileira que se originou no estado da Bahia e que incorpora elementos das tradições religiosas iorubás, bantus e indígenas?",
+        "opcoes": ["Candomblé", "Umbanda", "Espiritismo", "Catolicismo"],
+        "respostaCorreta": "Candomblé"
+      }
+    ];
+    mostrarQuestao();
+  </script>
+</body>
+
+</html>
