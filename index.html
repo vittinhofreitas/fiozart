@@ -1,332 +1,482 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-  <title>Jogo da Consciência Negra</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #ffffff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-
-    #game-container {
-      max-width: 600px;
-      margin: 50px auto;
-    }
-
-    h1 {
-      font-size: 24px;
-      color: #000000;
-    }
-
-    #options-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    button {
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    #score {
-      font-size: 18px;
-      color: #333333;
-    }
-
-    #restart-button,
-    #submit-button {
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      padding: 15px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin-top: 20px;
-      cursor: pointer;
-    }
-
-    #name-input {
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-
-    #leaderboard-container {
-      margin-top: 20px;
-    }
-
-    #leaderboard {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    #leaderboard th,
-    #leaderboard td {
-      border: 1px solid #dddddd;
-      text-align: left;
-      padding: 8px;
-    }
-
-    #leaderboard th {
-      background-color: #f2f2f2;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container mt-5" id="game-container">
-    <h1 id="questao" class="mb-4"></h1>
-    <div id="options-container" class="mb-4"></div>
-    <p id="score" class="lead">Pontuação: <span id="score-value">0</span></p>
-    <input type="text" id="name-input" class="form-control mb-4" placeholder="Digite seu nome">
-    <button class="btn btn-success btn-lg" id="submit-button" style="display:none" onclick="enviarPontuacao()">Enviar</button>
-    <button class="btn btn-primary btn-lg" id="restart-button" style="display:none" onclick="reiniciarJogo()">Reiniciar Jogo</button>
-    <div id="leaderboard-container" class="mt-5">
-      <h2>Melhores Pontuações</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Pontuação</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboard-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-  <script>
-    let indiceAtualQuestao = 0;
-    let pontuacao = 0;
-    let nomeJogador = "";
-    const placar = [];
-
-    const elementoQuestao = document.getElementById('questao');
-    const containerOpcoes = document.getElementById('options-container');
-    const elementoPontuacao = document.getElementById('score-value');
-    const botaoReiniciar = document.getElementById('restart-button');
-    const botaoEnviar = document.getElementById('submit-button');
-    const entradaNome = document.getElementById('name-input');
-    const corpoPlacar = document.getElementById('leaderboard-body');
-
-    function mostrarQuestao() {
-      const questaoAtual = questoes[indiceAtualQuestao];
-      elementoQuestao.textContent = questaoAtual.questao;
-      containerOpcoes.innerHTML = '';
-
-      questaoAtual.opcoes.forEach((opcao) => {
-        const botao = document.createElement('button');
-        botao.textContent = opcao;
-        botao.addEventListener('click', () => lidarComResposta(opcao, botao));
-        containerOpcoes.appendChild(botao);
-      });
-    }
-
-    function lidarComResposta(respostaSelecionada, botao) {
-      const questaoAtual = questoes[indiceAtualQuestao];
-
-      for (let i = 0; i < questaoAtual.opcoes.length; i++) {
-        if (questaoAtual.opcoes[i] === questaoAtual.respostaCorreta) {
-          botao.classList.add('btn-success');
-        } else {
-          if (questaoAtual.opcoes[i] === respostaSelecionada) {
-            botao.classList.add('btn-danger');
-          } else {
-            const botoes = containerOpcoes.getElementsByTagName('button');
-            for (let j = 0; j < botoes.length; j++) {
-              if (questaoAtual.opcoes[j] === questaoAtual.respostaCorreta) {
-                botoes[j].classList.add('btn-success');
-                botoes[j].disabled = true;
-              }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Financeira - Fiozart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Adicionando a biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Customização de cores do Tailwind para a marca Fiozart
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark': '#4a2c2a',
+                        'brand-primary': '#8d5b4c',
+                        'brand-light': '#d4a373',
+                        'brand-bg': '#fdf8f0',
+                        'brand-bg-light': '#fffaf3',
+                    }
+                }
             }
-          }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdf8f0;
+            position: relative;
+        }
+        body::after {
+            content: "";
+            background-image: url('https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw;
+            height: 60vh;
+            opacity: 0.04;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-brand-bg">
+
+    <div class="container mx-auto max-w-5xl p-4 sm:p-8">
+        
+        <header class="text-center mb-8">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-24 w-auto mx-auto mb-4"/>
+            <h1 class="text-4xl font-bold text-brand-dark">Gestão Fiozart</h1>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Coluna da Esquerda: Lançamentos e Histórico -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Seção de Visão Geral -->
+                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
+                    <div class="flex justify-between items-center mb-4 border-b border-brand-light pb-2">
+                         <h2 class="text-2xl font-semibold text-brand-dark">Resumo Financeiro</h2>
+                         <input type="month" id="monthFilter" class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-primary focus:border-brand-primary">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                        <div class="bg-green-50 p-6 rounded-xl border border-green-200">
+                            <p class="text-sm font-medium text-green-700">Receitas do Mês</p>
+                            <p id="totalReceitas" class="text-3xl font-bold text-green-600 mt-1">R$ 0,00</p>
+                        </div>
+                        <div class="bg-red-50 p-6 rounded-xl border border-red-200">
+                            <p class="text-sm font-medium text-red-700">Despesas do Mês</p>
+                            <p id="totalDespesas" class="text-3xl font-bold text-red-600 mt-1">R$ 0,00</p>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                            <p class="text-sm font-medium text-blue-700">Lucro / Saldo</p>
+                            <p id="saldoTotal" class="text-3xl font-bold text-blue-600 mt-1">R$ 0,00</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção para Adicionar Lançamento -->
+                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Adicionar Lançamento</h2>
+                    <form id="transactionForm" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo</label>
+                                <select id="tipo" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary">
+                                    <option value="receita">Receita</option>
+                                    <option value="despesa">Despesa</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="valor" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
+                                <input type="number" id="valor" step="0.01" placeholder="75,50" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary" required>
+                            </div>
+                            <div>
+                                <label for="data" class="block text-sm font-medium text-gray-700">Data</label>
+                                <input type="date" id="data" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary" required>
+                            </div>
+                            
+                            <div id="campo-servico" class="sm:col-span-2">
+                                 <label for="servico" class="block text-sm font-medium text-gray-700">Serviço Prestado</label>
+                                 <select id="servico" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary"></select>
+                            </div>
+
+                             <div id="campo-categoria-despesa" class="sm:col-span-2 hidden">
+                                <label for="categoria-despesa" class="block text-sm font-medium text-gray-700">Categoria da Despesa</label>
+                                <select id="categoria-despesa" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary">
+                                    <option>Material de Trabalho</option>
+                                    <option>Aluguel/Contas Fixas</option>
+                                    <option>Marketing/Divulgação</option>
+                                    <option>Transporte</option>
+                                    <option>Alimentação</option>
+                                    <option>Outros</option>
+                                </select>
+                             </div>
+                            
+                            <div id="campo-descricao" class="sm:col-span-1">
+                                 <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
+                                 <input type="text" id="descricao" placeholder="Ex: Compra de jumbo" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary">
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                             <button type="submit" class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light transition-colors">
+                                Adicionar Lançamento
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Análise Visual -->
+                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Análise Visual do Mês</h2>
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-center text-brand-dark mb-2">Receitas vs. Despesas</h3>
+                            <canvas id="fluxoCaixaChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                             <div>
+                                <h3 class="text-lg font-semibold text-center text-brand-dark mb-2">Composição das Despesas</h3>
+                                <canvas id="despesasChart"></canvas>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-center text-brand-dark mb-2">Serviços Mais Rentáveis</h3>
+                                <canvas id="servicosChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Histórico de Lançamentos -->
+                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Histórico de Lançamentos</h2>
+                    <div id="transactionList" class="space-y-3">
+                        <p id="empty-transactions" class="text-center text-gray-500 py-4">Nenhum lançamento adicionado ainda.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Coluna da Direita: Metas e Investimentos -->
+            <div class="lg:col-span-1 space-y-8">
+                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Metas e Investimentos</h2>
+                    <form id="goalForm" class="space-y-4 mb-6">
+                        <div>
+                            <label for="goal-desc" class="block text-sm font-medium text-gray-700">Descrição da Meta</label>
+                            <input type="text" id="goal-desc" placeholder="Ex: Cadeira de salão nova" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary" required>
+                        </div>
+                        <div>
+                            <label for="goal-total" class="block text-sm font-medium text-gray-700">Valor Total (R$)</label>
+                            <input type="number" step="0.01" id="goal-total" placeholder="1500,00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary" required>
+                        </div>
+                        <button type="submit" class="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark transition-colors">Adicionar Meta</button>
+                    </form>
+
+                    <div id="goalList" class="space-y-4">
+                         <p id="empty-goals" class="text-center text-gray-500 py-4">Nenhuma meta criada ainda.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <footer class="text-center mt-8 text-gray-400 text-sm">
+            <p>Desenvolvido para Fiozart pelo Momo</p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- ELEMENTOS DO DOM ---
+    const transactionForm = document.getElementById('transactionForm');
+    const totalReceitasEl = document.getElementById('totalReceitas');
+    const totalDespesasEl = document.getElementById('totalDespesas');
+    const saldoTotalEl = document.getElementById('saldoTotal');
+    const transactionListEl = document.getElementById('transactionList');
+    const dataInput = document.getElementById('data');
+    const tipoSelect = document.getElementById('tipo');
+    const valorInput = document.getElementById('valor');
+    const servicoSelect = document.getElementById('servico');
+    const categoriaDespesaSelect = document.getElementById('categoria-despesa');
+    const descricaoInput = document.getElementById('descricao');
+    const campoServico = document.getElementById('campo-servico');
+    const campoCategoriaDespesa = document.getElementById('campo-categoria-despesa');
+    const campoDescricao = document.getElementById('campo-descricao');
+    const emptyTransactionsEl = document.getElementById('empty-transactions');
+    const monthFilter = document.getElementById('monthFilter');
+
+    const goalForm = document.getElementById('goalForm');
+    const goalListEl = document.getElementById('goalList');
+    const emptyGoalsEl = document.getElementById('empty-goals');
+    
+    // --- INICIALIZAÇÃO DOS GRÁFICOS ---
+    const ctxFluxo = document.getElementById('fluxoCaixaChart').getContext('2d');
+    const ctxDespesas = document.getElementById('despesasChart').getContext('2d');
+    const ctxServicos = document.getElementById('servicosChart').getContext('2d');
+    let fluxoChart, despesasChart, servicosChart;
+
+    // --- DADOS ---
+    const catalogoServicos = [
+        { nome: 'Box Braids (Tradicional)', valor: 250.00 },
+        { nome: 'Nagô (Lateral)', valor: 80.00 },
+        { nome: 'Nagô (Topo da cabeça)', valor: 150.00 },
+        { nome: 'Twist', valor: 220.00 },
+        { nome: 'Boxeadora', valor: 90.00 },
+        { nome: 'Manutenção', valor: 100.00 },
+        { nome: 'Mão de Obra (cliente c/ material)', valor: 120.00 },
+        { nome: 'Outro (descrever manualmente)', valor: 0 },
+    ];
+    
+    const popularCatalogo = () => {
+        servicoSelect.innerHTML = '<option value="" data-valor="0">-- Selecione um serviço --</option>';
+        catalogoServicos.forEach(servico => {
+            const option = document.createElement('option');
+            option.value = servico.nome;
+            option.dataset.valor = servico.valor;
+            option.textContent = servico.nome;
+            servicoSelect.appendChild(option);
+        });
+    };
+
+    // --- CARREGAMENTO DE DADOS ---
+    let allTransactions = JSON.parse(localStorage.getItem('fiozart_transactions')) || [];
+    let goals = JSON.parse(localStorage.getItem('fiozart_goals')) || [];
+
+    // --- FUNÇÕES DE ARMAZENAMENTO ---
+    const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(allTransactions));
+    const saveGoals = () => localStorage.setItem('fiozart_goals', JSON.stringify(goals));
+    const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // --- LÓGICA PRINCIPAL ---
+    const updateDashboard = () => {
+        const selectedMonth = monthFilter.value; // Formato YYYY-MM
+        const transactions = allTransactions.filter(t => t.data.startsWith(selectedMonth));
+
+        // 1. Atualizar Resumo
+        const receitas = transactions.filter(t => t.tipo === 'receita').reduce((acc, t) => acc + t.valor, 0);
+        const despesas = transactions.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + t.valor, 0);
+        const saldo = receitas - despesas;
+        
+        totalReceitasEl.textContent = formatCurrency(receitas);
+        totalDespesasEl.textContent = formatCurrency(despesas);
+        saldoTotalEl.textContent = formatCurrency(saldo);
+        saldoTotalEl.classList.remove('text-green-600', 'text-red-600', 'text-blue-600');
+        saldoTotalEl.classList.add(saldo >= 0 ? 'text-green-600' : 'text-red-600');
+
+        // 2. Renderizar Histórico
+        renderTransactions(transactions);
+
+        // 3. Atualizar Gráficos
+        updateCharts(transactions);
+    };
+
+    const renderTransactions = (transactionsToRender) => {
+        transactionListEl.innerHTML = '';
+        if (transactionsToRender.length === 0) {
+            transactionListEl.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhum lançamento neste mês.</p>`;
+            return;
         }
 
-        botao.disabled = true;
-      }
+        const sorted = [...transactionsToRender].sort((a, b) => new Date(b.data) - new Date(a.data));
+        sorted.forEach(t => {
+            const isExpense = t.tipo === 'despesa';
+            const item = document.createElement('div');
+            item.className = `flex items-center justify-between p-3 rounded-lg border ${isExpense ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`;
+            item.innerHTML = `
+                <div>
+                    <p class="font-semibold text-brand-dark">${t.descricao}</p>
+                    <p class="text-sm text-gray-500">${new Date(t.data + 'T00:00:00-03:00').toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold ${isExpense ? 'text-red-600' : 'text-green-600'}">${isExpense ? '-' : '+'} ${formatCurrency(t.valor)}</p>
+                    <button onclick="deleteTransaction(${t.id})" class="text-xs text-gray-400 hover:text-red-500 transition-colors mt-1">Excluir</button>
+                </div>`;
+            transactionListEl.appendChild(item);
+        });
+    };
 
-      if (respostaSelecionada === questaoAtual.respostaCorreta) {
-        pontuacao++;
-      }
+    const addTransaction = (e) => {
+        e.preventDefault();
+        const tipo = tipoSelect.value;
+        const valor = parseFloat(valorInput.value);
+        const data = dataInput.value;
+        let descricao;
+        let categoria = null;
 
-      indiceAtualQuestao++;
+        if (tipo === 'receita') {
+            const servicoSelecionado = servicoSelect.value;
+            if (servicoSelecionado === 'Outro (descrever manualmente)') {
+                descricao = descricaoInput.value;
+            } else if (servicoSelecionado) {
+                descricao = servicoSelecionado;
+            } else {
+                alert('Por favor, selecione um serviço.');
+                return;
+            }
+        } else { // Despesa
+            categoria = categoriaDespesaSelect.value;
+            descricao = descricaoInput.value || categoria;
+        }
 
-      if (indiceAtualQuestao < questoes.length) {
-        setTimeout(() => {
-          resetarEstilosBotoes();
-          mostrarQuestao();
-        }, 1000);
-      } else {
-        setTimeout(() => {
-          resetarEstilosBotoes();
-          fimJogo();
-        }, 1000);
-      }
+        if (!descricao.trim() || isNaN(valor) || valor <= 0) {
+            alert('Por favor, preencha a descrição e o valor corretamente.');
+            return;
+        }
 
-      atualizarPontuacao();
-    }
+        allTransactions.push({ id: Date.now(), descricao, valor, tipo, data, categoria });
+        
+        saveTransactions();
+        monthFilter.value = data.substring(0, 7); // Mudar filtro para o mês do novo lançamento
+        updateDashboard();
+        
+        transactionForm.reset();
+        dataInput.valueAsDate = new Date();
+        toggleTransactionFields(); 
+    };
 
-    function resetarEstilosBotoes() {
-      const botoes = containerOpcoes.getElementsByTagName('button');
-      for (let i = 0; i < botoes.length; i++) {
-        botoes[i].classList.remove('btn-success', 'btn-danger');
-        botoes[i].disabled = false;
-      }
-    }
+    window.deleteTransaction = (id) => {
+        if (confirm('Deseja excluir este lançamento?')) {
+            allTransactions = allTransactions.filter(t => t.id !== id);
+            saveTransactions();
+            updateDashboard();
+        }
+    };
+    
+    const toggleTransactionFields = () => {
+        const isReceita = tipoSelect.value === 'receita';
+        campoServico.classList.toggle('hidden', !isReceita);
+        campoCategoriaDespesa.classList.toggle('hidden', isReceita);
 
-    function atualizarPontuacao() {
-      elementoPontuacao.textContent = pontuacao;
-    }
+        // Campo descrição para despesas e para receitas "Outro"
+        if (isReceita && servicoSelect.value !== 'Outro (descrever manualmente)') {
+             campoDescricao.classList.add('hidden');
+             descricaoInput.required = false;
+        } else {
+            campoDescricao.classList.remove('hidden');
+            descricaoInput.required = true;
+            descricaoInput.placeholder = isReceita ? 'Descrição da receita' : 'Ex: Compra de jumbo';
+        }
+    };
+    
+    // --- LÓGICA DE GRÁFICOS ---
+    const updateCharts = (transactions) => {
+        // Gráfico 1: Fluxo de Caixa (Receita x Despesa)
+        const daysInMonth = new Date(monthFilter.value.split('-')[0], monthFilter.value.split('-')[1], 0).getDate();
+        const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+        const receitasPorDia = new Array(daysInMonth).fill(0);
+        const despesasPorDia = new Array(daysInMonth).fill(0);
 
-    function fimJogo() {
-      elementoQuestao.textContent = "Fim de jogo!";
-      containerOpcoes.innerHTML = '';
-      botaoReiniciar.style.display = 'block';
-      botaoEnviar.style.display = 'block';
-      entradaNome.style.display = 'block';
-      botaoEnviar.style.display = 'block';
-      atualizarPlacar();
-    }
+        transactions.forEach(t => {
+            const day = new Date(t.data + 'T00:00:00-03:00').getDate() - 1;
+            if (t.tipo === 'receita') receitasPorDia[day] += t.valor;
+            else despesasPorDia[day] += t.valor;
+        });
 
-    function reiniciarJogo() {
-      indiceAtualQuestao = 0;
-      pontuacao = 0;
-      mostrarQuestao();
-      atualizarPontuacao();
-      botaoReiniciar.style.display = 'none';
-      botaoEnviar.style.display = 'none';
-      entradaNome.style.display = 'none';
-      nomeJogador = "";
-      entradaNome.value = "";
-    }
+        if (fluxoChart) fluxoChart.destroy();
+        fluxoChart = new Chart(ctxFluxo, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Receitas', data: receitasPorDia, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.3 },
+                    { label: 'Despesas', data: despesasPorDia, borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.1)', fill: true, tension: 0.3 }
+                ]
+            }
+        });
 
-    function enviarPontuacao() {
-      const nomeEntrada = entradaNome.value.trim();
-      if (nomeEntrada !== "") {
-        nomeJogador = nomeEntrada;
-        placar.push({ nome: nomeJogador, pontuacao });
-        placar.sort((a, b) => b.pontuacao - a.pontuacao);
-        atualizarPlacar();
-        reiniciarJogo();
-      }
-    }
+        // Gráfico 2: Composição das Despesas
+        const despesasData = transactions.filter(t => t.tipo === 'despesa').reduce((acc, t) => {
+            acc[t.categoria] = (acc[t.categoria] || 0) + t.valor;
+            return acc;
+        }, {});
+        
+        if (despesasChart) despesasChart.destroy();
+        despesasChart = new Chart(ctxDespesas, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(despesasData),
+                datasets: [{
+                    data: Object.values(despesasData),
+                    backgroundColor: ['#8d5b4c', '#d4a373', '#4a2c2a', '#a16207', '#c2410c', '#facc15'],
+                }]
+            }
+        });
 
-    function atualizarPlacar() {
-      corpoPlacar.innerHTML = '';
+        // Gráfico 3: Serviços mais rentáveis
+        const servicosData = transactions.filter(t => t.tipo === 'receita').reduce((acc, t) => {
+             acc[t.descricao] = (acc[t.descricao] || 0) + t.valor;
+             return acc;
+        }, {});
+        
+        if (servicosChart) servicosChart.destroy();
+        servicosChart = new Chart(ctxServicos, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(servicosData),
+                datasets: [{
+                    label: 'Receita por Serviço',
+                    data: Object.values(servicosData),
+                    backgroundColor: '#8d5b4c',
+                    borderColor: '#4a2c2a',
+                    borderWidth: 1
+                }]
+            },
+            options: { indexAxis: 'y' }
+        });
+    };
 
-      placar.forEach((entrada) => {
-        const linha = document.createElement('tr');
-        const nomeCelula = document.createElement('td');
-        const pontuacaoCelula = document.createElement('td');
+    // --- LÓGICA DE METAS --- 
+    const renderGoals = () => {
+        goalListEl.innerHTML = '';
+        if (goals.length === 0) { goalListEl.appendChild(emptyGoalsEl); return; }
+        goals.forEach(goal => {
+            const percentage = goal.total > 0 ? (goal.guardado / goal.total) * 100 : 0;
+            const item = document.createElement('div');
+            item.className = 'p-4 border border-brand-light/50 rounded-lg space-y-3 bg-white';
+            let shoppingListHTML = goal.compras.map((compra, index) => `<li class="flex justify-between items-center text-sm text-gray-600"><span>- ${compra}</span><button onclick="deleteShoppingItem(${goal.id}, ${index})" class="text-red-400 hover:text-red-600">&times;</button></li>`).join('');
+            item.innerHTML = `<div class="flex justify-between items-start"><h3 class="font-bold text-brand-dark">${goal.descricao}</h3><button onclick="deleteGoal(${goal.id})" class="text-gray-400 hover:text-red-500 font-bold">&times;</button></div><div><div class="flex justify-between text-sm font-medium text-gray-600 mb-1"><span>${formatCurrency(goal.guardado)}</span><span>${formatCurrency(goal.total)}</span></div><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-brand-primary h-4 rounded-full" style="width: ${percentage}%"></div></div></div><div class="flex gap-2"><input type="number" id="add-amount-${goal.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Adicionar valor"><button onclick="addAmountToGoal(${goal.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div><div><h4 class="text-sm font-semibold text-gray-600 mt-2">Lista de Compras:</h4><ul class="list-none space-y-1 mt-1">${shoppingListHTML || '<li class="text-xs text-gray-400">Nenhum item.</li>'}</ul><div class="flex gap-2 mt-2"><input type="text" id="add-shopping-${goal.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Item a comprar"><button onclick="addShoppingItem(${goal.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div></div>`;
+            goalListEl.appendChild(item);
+        });
+    };
+    const addGoal = (e) => { e.preventDefault(); const d = document.getElementById('goal-desc').value; const t = parseFloat(document.getElementById('goal-total').value); if (!d.trim() || isNaN(t) || t <= 0) return; goals.push({ id: Date.now(), descricao: d, total: t, guardado: 0, compras: [] }); saveGoals(); renderGoals(); goalForm.reset(); };
+    window.deleteGoal = (id) => { if(confirm('Tem certeza?')){ goals = goals.filter(g => g.id !== id); saveGoals(); renderGoals(); } };
+    window.addAmountToGoal = (id) => { const i = document.getElementById(`add-amount-${id}`); const a = parseFloat(i.value); if(isNaN(a) || a <= 0) return; const g = goals.find(g => g.id === id); if(g) { g.guardado += a; saveGoals(); renderGoals(); i.value = ''; } };
+    window.addShoppingItem = (id) => { const i = document.getElementById(`add-shopping-${id}`); const t = i.value.trim(); if(!t) return; const g = goals.find(g => g.id === id); if(g) { g.compras.push(t); saveGoals(); renderGoals(); i.value = ''; } };
+    window.deleteShoppingItem = (gId, iIdx) => { const g = goals.find(g => g.id === gId); if (g) { g.compras.splice(iIdx, 1); saveGoals(); renderGoals(); } };
 
-        nomeCelula.textContent = entrada.nome;
-        pontuacaoCelula.textContent = entrada.pontuacao;
+    // --- INICIALIZAÇÃO & EVENTOS ---
+    const init = () => {
+        const today = new Date();
+        monthFilter.value = today.toISOString().substring(0, 7);
+        dataInput.valueAsDate = today;
 
-        linha.appendChild(nomeCelula);
-        linha.appendChild(pontuacaoCelula);
+        tipoSelect.addEventListener('change', toggleTransactionFields);
+        servicoSelect.addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const valorServico = parseFloat(selectedOption.dataset.valor);
+            valorInput.value = valorServico > 0 ? valorServico.toFixed(2) : '';
+            toggleTransactionFields();
+        });
+        transactionForm.addEventListener('submit', addTransaction);
+        goalForm.addEventListener('submit', addGoal);
+        monthFilter.addEventListener('change', updateDashboard);
+        
+        popularCatalogo();
+        toggleTransactionFields();
+        updateDashboard();
+        renderGoals();
+    };
 
-        corpoPlacar.appendChild(linha);
-      });
-    }
-
-    // Array de objetos contendo as perguntas, opções e respostas corretas
-    const questoes = [
-      {
-        "questao": "Qual foi o ano em que a escravidão foi oficialmente abolida no Brasil?",
-        "opcoes": ["1822", "1888", "1910", "1930"],
-        "respostaCorreta": "1888"
-      },
-      {
-        "questao": "Qual foi o nome do movimento que defendia o fim gradual da escravidão?",
-        "opcoes": ["Abolicionismo", "Escravagismo", "Libertarismo", "Revolucionismo"],
-        "respostaCorreta": "Abolicionismo"
-      },
-      {
-        "questao": "Qual é o dia da Consciência Negra no Brasil?",
-        "opcoes": ["13 de maio", "20 de novembro", "21 de março", "25 de julho"],
-        "respostaCorreta": "20 de novembro"
-      },
-      {
-        "questao": "Qual é o nome do gênero musical considerado um símbolo da cultura afro-brasileira?",
-        "opcoes": ["Samba", "Forró", "Funk", "Rock"],
-        "respostaCorreta": "Samba"
-      },
-      {
-        "questao": "Qual é o nome do ritual de iniciação em uma religião de matriz africana?",
-        "opcoes": ["Batismo", "Feitura", "Confirmação", "Casamento"],
-        "respostaCorreta": "Feitura"
-      },
-      {
-        "questao": "Quem foi o líder do Quilombo dos Palmares, importante símbolo da resistência contra a escravidão no Brasil?",
-        "opcoes": ["Zumbi", "Ganga Zumba", "Chico Rei", "Machado de Assis"],
-        "respostaCorreta": "Zumbi"
-      },
-      {
-        "questao": "Em que ano a Lei Áurea foi assinada, oficialmente abolindo a escravidão no Brasil?",
-        "opcoes": ["1850", "1888", "1900", "1922"],
-        "respostaCorreta": "1888"
-      },
-      {
-        "questao": "Quem foi a princesa que assinou a Lei Áurea, abolindo a escravidão no Brasil?",
-        "opcoes": ["Princesa Isabel", "Princesa Leopoldina", "Princesa Maria", "Princesa Ana"],
-        "respostaCorreta": "Princesa Isabel"
-      },
-      {
-        "questao": "Quem foi o primeiro escritor negro a entrar para a Academia Brasileira de Letras?",
-        "opcoes": ["Machado de Assis", "Carlos Drummond de Andrade", "Cecília Meireles", "Darcy Ribeiro"],
-        "respostaCorreta": "Machado de Assis"
-      },
-      {
-        "questao": "Qual prato da culinária brasileira tem origem africana?",
-        "opcoes": ["Feijoada", "Acarajé", "Pão de queijo", "Pastel"],
-        "respostaCorreta": "Acarajé"
-      },
-      {
-        "questao": "Qual é o nome do estilo musical brasileiro que combina elementos de samba e jazz?",
-        "opcoes": ["Bossa Nova", "MPB", "Axé", "Funk"],
-        "respostaCorreta": "Bossa Nova"
-      },
-      {
-        "questao": "Qual é o nome da dança afro-brasileira que combina elementos de dança e luta?",
-        "opcoes": ["Samba", "Forró", "Capoeira", "Frevo"],
-        "respostaCorreta": "Capoeira"
-      },
-      {
-        "questao": "Quem foi a ativista dos direitos civis e política brasileira, conhecida por sua luta pelos direitos das mulheres negras?",
-        "opcoes": ["Dandara", "Benedita da Silva", "Chica da Silva", "Leila Gonzalez"],
-        "respostaCorreta": "Benedita da Silva"
-      },
-      {
-        "questao": "Qual é o nome do instrumento musical afro-brasileiro, feito de uma cabaça, um arame e um pedaço de madeira, usado na capoeira?",
-        "opcoes": ["Atabaque", "Agogô", "Berimbau", "Pandeiro"],
-        "respostaCorreta": "Berimbau"
-      },
-      {
-        "questao": "Qual é o nome da religião afro-brasileira que se originou no estado da Bahia e que incorpora elementos das tradições religiosas iorubás, bantus e indígenas?",
-        "opcoes": ["Candomblé", "Umbanda", "Espiritismo", "Catolicismo"],
-        "respostaCorreta": "Candomblé"
-      }
-    ];
-    mostrarQuestao();
-  </script>
+    init();
+});
+</script>
 </body>
-
 </html>
