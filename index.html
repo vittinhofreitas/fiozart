@@ -8,11 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" type="imagex/png" href="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-24 w-auto mx-auto mb-4">
-    <!-- Adicionando a biblioteca de gráficos Chart.js -->
+    <link rel="shortcut icon" type="imagex/png" href="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Customização de cores do Tailwind para a marca Fiozart
         tailwind.config = {
             theme: {
                 extend: {
@@ -47,6 +45,10 @@
             height: 60vh;
             opacity: 0.04;
             z-index: -1;
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
         }
     </style>
 </head>
@@ -87,7 +89,10 @@
 
                 <!-- Seção para Adicionar Lançamento -->
                 <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
-                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Adicionar Lançamento</h2>
+                    <div class="flex justify-between items-center mb-4 border-b border-brand-light pb-2">
+                        <h2 class="text-2xl font-semibold text-brand-dark">Adicionar Lançamento</h2>
+                        <button id="manageCatalogBtn" class="text-sm text-brand-primary hover:text-brand-dark font-semibold">Gerenciar Catálogo</button>
+                    </div>
                     <form id="transactionForm" class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
@@ -190,9 +195,45 @@
         </main>
         
         <footer class="text-center mt-8 text-gray-400 text-sm">
-            <p>Desenvolvido para Fiozart pelo Momo</p>
+            <p>Desenvolvido para Fiozart com ❤️</p>
         </footer>
     </div>
+    
+    <!-- Modal de Gerenciamento de Catálogo -->
+    <div id="catalogModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-backdrop fixed inset-0" id="modalBackdrop"></div>
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg m-4 p-6 z-10">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-brand-dark">Gerenciar Catálogo de Serviços</h2>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+
+            <!-- Formulário para adicionar/editar serviço -->
+            <form id="serviceForm" class="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
+                <h3 id="serviceFormTitle" class="text-lg font-semibold text-brand-dark">Adicionar Novo Serviço</h3>
+                <input type="hidden" id="serviceId">
+                <div>
+                    <label for="serviceName" class="block text-sm font-medium text-gray-700">Nome do Serviço</label>
+                    <input type="text" id="serviceName" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                </div>
+                <div>
+                    <label for="serviceValue" class="block text-sm font-medium text-gray-700">Valor Padrão (R$)</label>
+                    <input type="number" step="0.01" id="serviceValue" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" id="saveServiceBtn" class="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark transition-colors">Salvar</button>
+                    <button type="button" id="cancelEditBtn" class="w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors hidden">Cancelar Edição</button>
+                </div>
+            </form>
+
+            <!-- Lista de serviços -->
+            <h3 class="text-lg font-semibold text-brand-dark mb-2">Serviços Cadastrados</h3>
+            <div id="serviceList" class="space-y-2 max-h-64 overflow-y-auto pr-2">
+                <!-- Serviços serão inseridos aqui -->
+            </div>
+        </div>
+    </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -211,32 +252,137 @@ document.addEventListener('DOMContentLoaded', () => {
     const campoServico = document.getElementById('campo-servico');
     const campoCategoriaDespesa = document.getElementById('campo-categoria-despesa');
     const campoDescricao = document.getElementById('campo-descricao');
-    const emptyTransactionsEl = document.getElementById('empty-transactions');
     const monthFilter = document.getElementById('monthFilter');
-
     const goalForm = document.getElementById('goalForm');
     const goalListEl = document.getElementById('goalList');
     const emptyGoalsEl = document.getElementById('empty-goals');
     
-    // --- INICIALIZAÇÃO DOS GRÁFICOS ---
+    // --- Elementos do Modal de Catálogo ---
+    const catalogModal = document.getElementById('catalogModal');
+    const manageCatalogBtn = document.getElementById('manageCatalogBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const serviceForm = document.getElementById('serviceForm');
+    const serviceFormTitle = document.getElementById('serviceFormTitle');
+    const serviceIdInput = document.getElementById('serviceId');
+    const serviceNameInput = document.getElementById('serviceName');
+    const serviceValueInput = document.getElementById('serviceValue');
+    const saveServiceBtn = document.getElementById('saveServiceBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const serviceListEl = document.getElementById('serviceList');
+
+    // --- GRÁFICOS ---
     const ctxFluxo = document.getElementById('fluxoCaixaChart').getContext('2d');
     const ctxDespesas = document.getElementById('despesasChart').getContext('2d');
     const ctxServicos = document.getElementById('servicosChart').getContext('2d');
     let fluxoChart, despesasChart, servicosChart;
 
-    // --- DADOS ---
-    const catalogoServicos = [
-        { nome: 'Box Braids (Tradicional)', valor: 250.00 },
-        { nome: 'Nagô (Lateral)', valor: 80.00 },
-        { nome: 'Nagô (Topo da cabeça)', valor: 150.00 },
-        { nome: 'Twist', valor: 220.00 },
-        { nome: 'Boxeadora', valor: 90.00 },
-        { nome: 'Manutenção', valor: 100.00 },
-        { nome: 'Mão de Obra (cliente c/ material)', valor: 120.00 },
-        { nome: 'Outro (descrever manualmente)', valor: 0 },
-    ];
+    // --- FUNÇÕES DE ARMAZENAMENTO ---
+    const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(allTransactions));
+    const saveGoals = () => localStorage.setItem('fiozart_goals', JSON.stringify(goals));
+    const saveCatalogo = () => localStorage.setItem('fiozart_catalogo', JSON.stringify(catalogoServicos));
+    const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // --- CARREGAMENTO DE DADOS DO LOCALSTORAGE ---
+    let allTransactions = JSON.parse(localStorage.getItem('fiozart_transactions')) || [];
+    let goals = JSON.parse(localStorage.getItem('fiozart_goals')) || [];
+    let catalogoServicos = JSON.parse(localStorage.getItem('fiozart_catalogo'));
+
+    // --- INICIALIZAÇÃO DO CATÁLOGO PADRÃO (SE FOR A PRIMEIRA VEZ) ---
+    if (!catalogoServicos || catalogoServicos.length === 0) {
+        catalogoServicos = [
+            { id: Date.now() + 1, nome: 'Box Braids (Tradicional)', valor: 250.00 },
+            { id: Date.now() + 2, nome: 'Nagô (Lateral)', valor: 80.00 },
+            { id: Date.now() + 3, nome: 'Twist', valor: 220.00 },
+            { id: Date.now() + 4, nome: 'Mão de Obra (cliente c/ material)', valor: 120.00 },
+        ];
+        saveCatalogo();
+    }
     
-    const popularCatalogo = () => {
+    // --- LÓGICA DE GERENCIAMENTO DO CATÁLOGO ---
+    const openCatalogModal = () => catalogModal.classList.remove('hidden');
+    const closeCatalogModal = () => catalogModal.classList.add('hidden');
+
+    const resetServiceForm = () => {
+        serviceForm.reset();
+        serviceIdInput.value = '';
+        serviceFormTitle.textContent = 'Adicionar Novo Serviço';
+        saveServiceBtn.textContent = 'Salvar';
+        cancelEditBtn.classList.add('hidden');
+    };
+    
+    const renderCatalogList = () => {
+        serviceListEl.innerHTML = '';
+        if (catalogoServicos.length === 0) {
+            serviceListEl.innerHTML = `<p class="text-sm text-gray-500 text-center">Nenhum serviço cadastrado.</p>`;
+            return;
+        }
+        catalogoServicos.forEach(service => {
+            const item = document.createElement('div');
+            item.className = 'flex justify-between items-center p-2 border rounded-md';
+            item.innerHTML = `
+                <div>
+                    <p class="font-semibold text-brand-dark">${service.nome}</p>
+                    <p class="text-sm text-gray-600">${formatCurrency(service.valor)}</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="editService(${service.id})" class="text-sm text-blue-600 hover:text-blue-800">Editar</button>
+                    <button onclick="deleteService(${service.id})" class="text-sm text-red-600 hover:text-red-800">Excluir</button>
+                </div>
+            `;
+            serviceListEl.appendChild(item);
+        });
+    };
+
+    const handleSaveService = (e) => {
+        e.preventDefault();
+        const id = serviceIdInput.value ? Number(serviceIdInput.value) : null;
+        const nome = serviceNameInput.value;
+        const valor = parseFloat(serviceValueInput.value);
+
+        if (!nome.trim() || isNaN(valor)) {
+            alert('Por favor, preencha os campos corretamente.');
+            return;
+        }
+
+        if (id) { // Editando
+            const serviceIndex = catalogoServicos.findIndex(s => s.id === id);
+            if (serviceIndex > -1) {
+                catalogoServicos[serviceIndex] = { id, nome, valor };
+            }
+        } else { // Adicionando
+            catalogoServicos.push({ id: Date.now(), nome, valor });
+        }
+
+        saveCatalogo();
+        renderCatalogList();
+        popularCatalogoNoForm();
+        resetServiceForm();
+    };
+
+    window.editService = (id) => {
+        const service = catalogoServicos.find(s => s.id === id);
+        if (service) {
+            serviceIdInput.value = service.id;
+            serviceNameInput.value = service.nome;
+            serviceValueInput.value = service.valor.toFixed(2);
+            serviceFormTitle.textContent = 'Editar Serviço';
+            saveServiceBtn.textContent = 'Salvar Alterações';
+            cancelEditBtn.classList.remove('hidden');
+            serviceNameInput.focus();
+        }
+    };
+    
+    window.deleteService = (id) => {
+        if (confirm('Tem certeza que deseja excluir este serviço do catálogo?')) {
+            catalogoServicos = catalogoServicos.filter(s => s.id !== id);
+            saveCatalogo();
+            renderCatalogList();
+            popularCatalogoNoForm();
+        }
+    };
+    
+    const popularCatalogoNoForm = () => {
         servicoSelect.innerHTML = '<option value="" data-valor="0">-- Selecione um serviço --</option>';
         catalogoServicos.forEach(servico => {
             const option = document.createElement('option');
@@ -245,59 +391,46 @@ document.addEventListener('DOMContentLoaded', () => {
             option.textContent = servico.nome;
             servicoSelect.appendChild(option);
         });
+        const outroOption = document.createElement('option');
+        outroOption.value = 'Outro (descrever manualmente)';
+        outroOption.dataset.valor = 0;
+        outroOption.textContent = 'Outro (descrever manualmente)';
+        servicoSelect.appendChild(outroOption);
     };
 
-    // --- CARREGAMENTO DE DADOS ---
-    let allTransactions = JSON.parse(localStorage.getItem('fiozart_transactions')) || [];
-    let goals = JSON.parse(localStorage.getItem('fiozart_goals')) || [];
-
-    // --- FUNÇÕES DE ARMAZENAMENTO ---
-    const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(allTransactions));
-    const saveGoals = () => localStorage.setItem('fiozart_goals', JSON.stringify(goals));
-    const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-    // --- LÓGICA PRINCIPAL ---
+    // --- RESTANTE DAS FUNÇÕES (Dashboard, Transações, Metas, Gráficos) ---
     const updateDashboard = () => {
-        const selectedMonth = monthFilter.value; // Formato YYYY-MM
+        const selectedMonth = monthFilter.value;
         const transactions = allTransactions.filter(t => t.data.startsWith(selectedMonth));
-
-        // 1. Atualizar Resumo
         const receitas = transactions.filter(t => t.tipo === 'receita').reduce((acc, t) => acc + t.valor, 0);
         const despesas = transactions.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + t.valor, 0);
         const saldo = receitas - despesas;
-        
         totalReceitasEl.textContent = formatCurrency(receitas);
         totalDespesasEl.textContent = formatCurrency(despesas);
         saldoTotalEl.textContent = formatCurrency(saldo);
         saldoTotalEl.classList.remove('text-green-600', 'text-red-600', 'text-blue-600');
         saldoTotalEl.classList.add(saldo >= 0 ? 'text-green-600' : 'text-red-600');
-
-        // 2. Renderizar Histórico
         renderTransactions(transactions);
-
-        // 3. Atualizar Gráficos
         updateCharts(transactions);
     };
 
     const renderTransactions = (transactionsToRender) => {
-        transactionListEl.innerHTML = '';
+        transactionListEl.innerHTML = "";
         if (transactionsToRender.length === 0) {
             transactionListEl.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhum lançamento neste mês.</p>`;
             return;
         }
-
-        const sorted = [...transactionsToRender].sort((a, b) => new Date(b.data) - new Date(a.data));
-        sorted.forEach(t => {
+        [...transactionsToRender].sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(t => {
             const isExpense = t.tipo === 'despesa';
-            const item = document.createElement('div');
-            item.className = `flex items-center justify-between p-3 rounded-lg border ${isExpense ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`;
+            const item = document.createElement("div");
+            item.className = `flex items-center justify-between p-3 rounded-lg border ${isExpense ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`;
             item.innerHTML = `
                 <div>
                     <p class="font-semibold text-brand-dark">${t.descricao}</p>
-                    <p class="text-sm text-gray-500">${new Date(t.data + 'T00:00:00-03:00').toLocaleDateString('pt-BR')}</p>
+                    <p class="text-sm text-gray-500">${new Date(t.data + "T00:00:00-03:00").toLocaleDateString("pt-BR")}</p>
                 </div>
                 <div class="text-right">
-                    <p class="font-bold ${isExpense ? 'text-red-600' : 'text-green-600'}">${isExpense ? '-' : '+'} ${formatCurrency(t.valor)}</p>
+                    <p class="font-bold ${isExpense ? "text-red-600" : "text-green-600"}">${isExpense ? "-" : "+"} ${formatCurrency(t.valor)}</p>
                     <button onclick="deleteTransaction(${t.id})" class="text-xs text-gray-400 hover:text-red-500 transition-colors mt-1">Excluir</button>
                 </div>`;
             transactionListEl.appendChild(item);
@@ -311,7 +444,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = dataInput.value;
         let descricao;
         let categoria = null;
-
         if (tipo === 'receita') {
             const servicoSelecionado = servicoSelect.value;
             if (servicoSelecionado === 'Outro (descrever manualmente)') {
@@ -319,139 +451,146 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (servicoSelecionado) {
                 descricao = servicoSelecionado;
             } else {
-                alert('Por favor, selecione um serviço.');
+                alert("Por favor, selecione um serviço.");
                 return;
             }
-        } else { // Despesa
+        } else {
             categoria = categoriaDespesaSelect.value;
             descricao = descricaoInput.value || categoria;
         }
-
         if (!descricao.trim() || isNaN(valor) || valor <= 0) {
-            alert('Por favor, preencha a descrição e o valor corretamente.');
+            alert("Por favor, preencha a descrição e o valor corretamente.");
             return;
         }
-
         allTransactions.push({ id: Date.now(), descricao, valor, tipo, data, categoria });
-        
         saveTransactions();
-        monthFilter.value = data.substring(0, 7); // Mudar filtro para o mês do novo lançamento
+        monthFilter.value = data.substring(0, 7);
         updateDashboard();
-        
         transactionForm.reset();
         dataInput.valueAsDate = new Date();
-        toggleTransactionFields(); 
+        toggleTransactionFields();
     };
 
     window.deleteTransaction = (id) => {
-        if (confirm('Deseja excluir este lançamento?')) {
+        if (confirm("Deseja excluir este lançamento?")) {
             allTransactions = allTransactions.filter(t => t.id !== id);
             saveTransactions();
             updateDashboard();
         }
     };
-    
+
     const toggleTransactionFields = () => {
         const isReceita = tipoSelect.value === 'receita';
         campoServico.classList.toggle('hidden', !isReceita);
         campoCategoriaDespesa.classList.toggle('hidden', isReceita);
-
-        // Campo descrição para despesas e para receitas "Outro"
         if (isReceita && servicoSelect.value !== 'Outro (descrever manualmente)') {
-             campoDescricao.classList.add('hidden');
-             descricaoInput.required = false;
+            campoDescricao.classList.add('hidden');
+            descricaoInput.required = false;
         } else {
             campoDescricao.classList.remove('hidden');
             descricaoInput.required = true;
             descricaoInput.placeholder = isReceita ? 'Descrição da receita' : 'Ex: Compra de jumbo';
         }
     };
-    
-    // --- LÓGICA DE GRÁFICOS ---
+
     const updateCharts = (transactions) => {
-        // Gráfico 1: Fluxo de Caixa (Receita x Despesa)
-        const daysInMonth = new Date(monthFilter.value.split('-')[0], monthFilter.value.split('-')[1], 0).getDate();
+        const daysInMonth = new Date(monthFilter.value.split("-")[0], monthFilter.value.split("-")[1], 0).getDate();
         const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
         const receitasPorDia = new Array(daysInMonth).fill(0);
         const despesasPorDia = new Array(daysInMonth).fill(0);
-
         transactions.forEach(t => {
-            const day = new Date(t.data + 'T00:00:00-03:00').getDate() - 1;
+            const day = new Date(t.data + "T00:00:00-03:00").getDate() - 1;
             if (t.tipo === 'receita') receitasPorDia[day] += t.valor;
             else despesasPorDia[day] += t.valor;
         });
-
         if (fluxoChart) fluxoChart.destroy();
-        fluxoChart = new Chart(ctxFluxo, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    { label: 'Receitas', data: receitasPorDia, borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.3 },
-                    { label: 'Despesas', data: despesasPorDia, borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.1)', fill: true, tension: 0.3 }
-                ]
-            }
-        });
-
-        // Gráfico 2: Composição das Despesas
+        fluxoChart = new Chart(ctxFluxo, { type: "line", data: { labels, datasets: [{ label: "Receitas", data: receitasPorDia, borderColor: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", fill: true, tension: .3 }, { label: "Despesas", data: despesasPorDia, borderColor: "#dc2626", backgroundColor: "rgba(220, 38, 38, 0.1)", fill: true, tension: .3 }] } });
         const despesasData = transactions.filter(t => t.tipo === 'despesa').reduce((acc, t) => {
             acc[t.categoria] = (acc[t.categoria] || 0) + t.valor;
             return acc;
         }, {});
-        
         if (despesasChart) despesasChart.destroy();
-        despesasChart = new Chart(ctxDespesas, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(despesasData),
-                datasets: [{
-                    data: Object.values(despesasData),
-                    backgroundColor: ['#8d5b4c', '#d4a373', '#4a2c2a', '#a16207', '#c2410c', '#facc15'],
-                }]
-            }
-        });
-
-        // Gráfico 3: Serviços mais rentáveis
+        despesasChart = new Chart(ctxDespesas, { type: "doughnut", data: { labels: Object.keys(despesasData), datasets: [{ data: Object.values(despesasData), backgroundColor: ["#8d5b4c", "#d4a373", "#4a2c2a", "#a16207", "#c2410c", "#facc15"] }] } });
         const servicosData = transactions.filter(t => t.tipo === 'receita').reduce((acc, t) => {
-             acc[t.descricao] = (acc[t.descricao] || 0) + t.valor;
-             return acc;
+            acc[t.descricao] = (acc[t.descricao] || 0) + t.valor;
+            return acc;
         }, {});
-        
         if (servicosChart) servicosChart.destroy();
-        servicosChart = new Chart(ctxServicos, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(servicosData),
-                datasets: [{
-                    label: 'Receita por Serviço',
-                    data: Object.values(servicosData),
-                    backgroundColor: '#8d5b4c',
-                    borderColor: '#4a2c2a',
-                    borderWidth: 1
-                }]
-            },
-            options: { indexAxis: 'y' }
+        servicosChart = new Chart(ctxServicos, { type: "bar", data: { labels: Object.keys(servicosData), datasets: [{ label: "Receita por Serviço", data: Object.values(servicosData), backgroundColor: "#8d5b4c", borderColor: "#4a2c2a", borderWidth: 1 }] }, options: { indexAxis: "y" } });
+    };
+
+    const renderGoals = () => {
+        goalListEl.innerHTML = "";
+        if (goals.length === 0) {
+            goalListEl.innerHTML = `<p id="empty-goals" class="text-center text-gray-500 py-4">Nenhuma meta criada ainda.</p>`;
+            return;
+        }
+        goals.forEach(t => {
+            const e = t.total > 0 ? t.guardado / t.total * 100 : 0;
+            const o = document.createElement("div");
+            o.className = "p-4 border border-brand-light/50 rounded-lg space-y-3 bg-white";
+            let n = t.compras.map((e, o) => `<li class="flex justify-between items-center text-sm text-gray-600"><span>- ${e}</span><button onclick="deleteShoppingItem(${t.id}, ${o})" class="text-red-400 hover:text-red-600">&times;</button></li>`).join("");
+            o.innerHTML = `<div class="flex justify-between items-start"><h3 class="font-bold text-brand-dark">${t.descricao}</h3><button onclick="deleteGoal(${t.id})" class="text-gray-400 hover:text-red-500 font-bold">&times;</button></div><div><div class="flex justify-between text-sm font-medium text-gray-600 mb-1"><span>${formatCurrency(t.guardado)}</span><span>${formatCurrency(t.total)}</span></div><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-brand-primary h-4 rounded-full" style="width: ${e}%"></div></div></div><div class="flex gap-2"><input type="number" step="0.01" id="add-amount-${t.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Adicionar valor"><button onclick="addAmountToGoal(${t.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div><div><h4 class="text-sm font-semibold text-gray-600 mt-2">Lista de Compras:</h4><ul class="list-none space-y-1 mt-1">${n||'<li class="text-xs text-gray-400">Nenhum item.</li>'}</ul><div class="flex gap-2 mt-2"><input type="text" id="add-shopping-${t.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Item a comprar"><button onclick="addShoppingItem(${t.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div></div>`;
+            goalListEl.appendChild(o);
         });
     };
 
-    // --- LÓGICA DE METAS --- 
-    const renderGoals = () => {
-        goalListEl.innerHTML = '';
-        if (goals.length === 0) { goalListEl.appendChild(emptyGoalsEl); return; }
-        goals.forEach(goal => {
-            const percentage = goal.total > 0 ? (goal.guardado / goal.total) * 100 : 0;
-            const item = document.createElement('div');
-            item.className = 'p-4 border border-brand-light/50 rounded-lg space-y-3 bg-white';
-            let shoppingListHTML = goal.compras.map((compra, index) => `<li class="flex justify-between items-center text-sm text-gray-600"><span>- ${compra}</span><button onclick="deleteShoppingItem(${goal.id}, ${index})" class="text-red-400 hover:text-red-600">&times;</button></li>`).join('');
-            item.innerHTML = `<div class="flex justify-between items-start"><h3 class="font-bold text-brand-dark">${goal.descricao}</h3><button onclick="deleteGoal(${goal.id})" class="text-gray-400 hover:text-red-500 font-bold">&times;</button></div><div><div class="flex justify-between text-sm font-medium text-gray-600 mb-1"><span>${formatCurrency(goal.guardado)}</span><span>${formatCurrency(goal.total)}</span></div><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-brand-primary h-4 rounded-full" style="width: ${percentage}%"></div></div></div><div class="flex gap-2"><input type="number" id="add-amount-${goal.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Adicionar valor"><button onclick="addAmountToGoal(${goal.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div><div><h4 class="text-sm font-semibold text-gray-600 mt-2">Lista de Compras:</h4><ul class="list-none space-y-1 mt-1">${shoppingListHTML || '<li class="text-xs text-gray-400">Nenhum item.</li>'}</ul><div class="flex gap-2 mt-2"><input type="text" id="add-shopping-${goal.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Item a comprar"><button onclick="addShoppingItem(${goal.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div></div>`;
-            goalListEl.appendChild(item);
-        });
+    const addGoal = t => {
+        t.preventDefault();
+        const e = document.getElementById("goal-desc").value,
+            o = parseFloat(document.getElementById("goal-total").value);
+        if (e.trim() && !isNaN(o) && o > 0) {
+            goals.push({ id: Date.now(), descricao: e, total: o, guardado: 0, compras: [] });
+            saveGoals();
+            renderGoals();
+            goalForm.reset();
+        }
     };
-    const addGoal = (e) => { e.preventDefault(); const d = document.getElementById('goal-desc').value; const t = parseFloat(document.getElementById('goal-total').value); if (!d.trim() || isNaN(t) || t <= 0) return; goals.push({ id: Date.now(), descricao: d, total: t, guardado: 0, compras: [] }); saveGoals(); renderGoals(); goalForm.reset(); };
-    window.deleteGoal = (id) => { if(confirm('Tem certeza?')){ goals = goals.filter(g => g.id !== id); saveGoals(); renderGoals(); } };
-    window.addAmountToGoal = (id) => { const i = document.getElementById(`add-amount-${id}`); const a = parseFloat(i.value); if(isNaN(a) || a <= 0) return; const g = goals.find(g => g.id === id); if(g) { g.guardado += a; saveGoals(); renderGoals(); i.value = ''; } };
-    window.addShoppingItem = (id) => { const i = document.getElementById(`add-shopping-${id}`); const t = i.value.trim(); if(!t) return; const g = goals.find(g => g.id === id); if(g) { g.compras.push(t); saveGoals(); renderGoals(); i.value = ''; } };
-    window.deleteShoppingItem = (gId, iIdx) => { const g = goals.find(g => g.id === gId); if (g) { g.compras.splice(iIdx, 1); saveGoals(); renderGoals(); } };
+
+    window.deleteGoal = t => {
+        if(confirm("Tem certeza?")){
+            goals = goals.filter(e => e.id !== t);
+            saveGoals();
+            renderGoals();
+        }
+    };
+    
+    window.addAmountToGoal = t => {
+        const e = document.getElementById(`add-amount-${t}`),
+            o = parseFloat(e.value);
+        if (!isNaN(o) && o > 0) {
+            const n = goals.find(e => e.id === t);
+            if(n){
+                n.guardado += o;
+                saveGoals();
+                renderGoals();
+                e.value = "";
+            }
+        }
+    };
+
+    window.addShoppingItem = t => {
+        const e = document.getElementById(`add-shopping-${t}`),
+            o = e.value.trim();
+        if (o) {
+            const n = goals.find(e => e.id === t);
+            if(n){
+                n.compras.push(o);
+                saveGoals();
+                renderGoals();
+                e.value = "";
+            }
+        }
+    };
+
+    window.deleteShoppingItem = (t, e) => {
+        const o = goals.find(o => o.id === t);
+        if(o){
+            o.compras.splice(e, 1);
+            saveGoals();
+            renderGoals();
+        }
+    };
 
     // --- INICIALIZAÇÃO & EVENTOS ---
     const init = () => {
@@ -459,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         monthFilter.value = today.toISOString().substring(0, 7);
         dataInput.valueAsDate = today;
 
+        // Eventos principais
         tipoSelect.addEventListener('change', toggleTransactionFields);
         servicoSelect.addEventListener('change', (e) => {
             const selectedOption = e.target.options[e.target.selectedIndex];
@@ -470,7 +610,18 @@ document.addEventListener('DOMContentLoaded', () => {
         goalForm.addEventListener('submit', addGoal);
         monthFilter.addEventListener('change', updateDashboard);
         
-        popularCatalogo();
+        // Eventos do Modal de Catálogo
+        manageCatalogBtn.addEventListener('click', () => {
+            renderCatalogList();
+            openCatalogModal();
+        });
+        closeModalBtn.addEventListener('click', closeCatalogModal);
+        modalBackdrop.addEventListener('click', closeCatalogModal);
+        serviceForm.addEventListener('submit', handleSaveService);
+        cancelEditBtn.addEventListener('click', resetServiceForm);
+
+        // Inicialização dos dados
+        popularCatalogoNoForm();
         toggleTransactionFields();
         updateDashboard();
         renderGoals();
@@ -481,4 +632,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
