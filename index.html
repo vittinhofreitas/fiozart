@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão Financeira - Fiozart</title>
+    <title>Gestão Fiozart - Financeiro e Agenda</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" type="imagex/png" href="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- CDN do FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script>
+        // Customização de cores do Tailwind para a marca Fiozart
         tailwind.config = {
             theme: {
                 extend: {
@@ -31,605 +32,787 @@
             background-color: #fdf8f0;
             position: relative;
         }
+        /* Estilo para a marca d'água */
         body::after {
             content: "";
+            /* DEIXEI O ESPAÇO PARA VOCÊ COLOCAR A URL DA LOGO ABAIXO */
             background-image: url('https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0');
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60vw;
-            height: 60vh;
-            opacity: 0.04;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
             z-index: -1;
+            pointer-events: none;
         }
-        .modal-backdrop {
-            background-color: rgba(0,0,0,0.5);
-            transition: opacity 0.3s ease;
+        /* Ajustes no FullCalendar para combinar com o tema */
+        :root {
+            --fc-border-color: #d4a373;
+            --fc-daygrid-event-dot-width: 8px;
+            --fc-today-bg-color: rgba(212, 163, 115, 0.1);
+            --fc-button-bg-color: #8d5b4c;
+            --fc-button-active-bg-color: #4a2c2a;
+            --fc-button-hover-bg-color: #6b4438;
+            --fc-button-border-color: #8d5b4c;
+            --fc-button-active-border-color: #4a2c2a;
+            --fc-button-hover-border-color: #6b4438;
+        }
+        .fc .fc-toolbar-title {
+            color: #4a2c2a;
+        }
+        .fc .fc-daygrid-day-number {
+             color: #8d5b4c;
         }
     </style>
 </head>
-<body class="bg-brand-bg">
 
-    <div class="container mx-auto max-w-5xl p-4 sm:p-8">
+<body class="bg-brand-bg text-brand-dark">
+
+    <!-- Cabeçalho -->
+    <header class="bg-brand-bg-light/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-10 w-auto" id="logo-img">
+            <h1 class="text-2xl font-bold text-brand-dark">Gestão Fiozart</h1>
+            </div>
+
+            <div>
+                <button id="toggleToAgenda" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Ver Agenda
+                </button>
+                 <button id="toggleToFinanceiro" class="hidden bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Ver Financeiro
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="container mx-auto p-4 md:p-6">
         
-        <header class="text-center mb-8">
-            <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-24 w-auto mx-auto mb-4"/>
-            <h1 class="text-4xl font-bold text-brand-dark">Gestão Fiozart</h1>
-        </header>
-
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            <!-- Coluna da Esquerda: Lançamentos e Histórico -->
-            <div class="lg:col-span-2 space-y-8">
-                <!-- Seção de Visão Geral -->
-                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
-                    <div class="flex justify-between items-center mb-4 border-b border-brand-light pb-2">
-                         <h2 class="text-2xl font-semibold text-brand-dark">Resumo Financeiro</h2>
-                         <input type="month" id="monthFilter" class="border-gray-300 rounded-md shadow-sm text-sm focus:ring-brand-primary focus:border-brand-primary">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                        <div class="bg-green-50 p-6 rounded-xl border border-green-200">
-                            <p class="text-sm font-medium text-green-700">Receitas do Mês</p>
-                            <p id="totalReceitas" class="text-3xl font-bold text-green-600 mt-1">R$ 0,00</p>
+        <!-- VISÃO FINANCEIRA (INICIAL) -->
+        <div id="financeiroView">
+            <!-- Cards de Resumo -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-lg font-semibold text-gray-500">Receita do Mês</h3>
+                    <p id="receita-mes" class="text-3xl font-bold text-green-600 mt-2">R$ 0,00</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-lg font-semibold text-gray-500">Despesa do Mês</h3>
+                    <p id="despesa-mes" class="text-3xl font-bold text-red-600 mt-2">R$ 0,00</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-2 border-brand-primary">
+                    <h3 class="text-lg font-semibold text-gray-500">Lucro do Mês</h3>
+                    <p id="lucro-mes" class="text-3xl font-bold text-brand-dark mt-2">R$ 0,00</p>
+                </div>
+            </section>
+            
+            <!-- Seção Principal Dividida -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Coluna de Lançamentos -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex justify-between items-center mb-4 border-b pb-3">
+                             <h2 class="text-xl font-bold">Adicionar Lançamento</h2>
+                             <button id="openCatalogBtn" class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300">Gerenciar Catálogo</button>
                         </div>
-                        <div class="bg-red-50 p-6 rounded-xl border border-red-200">
-                            <p class="text-sm font-medium text-red-700">Despesas do Mês</p>
-                            <p id="totalDespesas" class="text-3xl font-bold text-red-600 mt-1">R$ 0,00</p>
-                        </div>
-                        <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
-                            <p class="text-sm font-medium text-blue-700">Lucro / Saldo</p>
-                            <p id="saldoTotal" class="text-3xl font-bold text-blue-600 mt-1">R$ 0,00</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Seção para Adicionar Lançamento -->
-                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
-                    <div class="flex justify-between items-center mb-4 border-b border-brand-light pb-2">
-                        <h2 class="text-2xl font-semibold text-brand-dark">Adicionar Lançamento</h2>
-                        <button id="manageCatalogBtn" class="text-sm text-brand-primary hover:text-brand-dark font-semibold">Gerenciar Catálogo</button>
-                    </div>
-                    <form id="transactionForm" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <form id="transaction-form" class="space-y-4">
                             <div>
-                                <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo</label>
-                                <select id="tipo" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary">
-                                    <option value="receita">Receita</option>
-                                    <option value="despesa">Despesa</option>
-                                </select>
+                                <label class="block text-sm font-medium">Tipo</label>
+                                <div class="mt-1 grid grid-cols-2 gap-2">
+                                    <button type="button" id="btn-receita" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg">Receita</button>
+                                    <button type="button" id="btn-despesa" class="w-full bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg">Despesa</button>
+                                </div>
                             </div>
-                            <div>
-                                <label for="valor" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
-                                <input type="number" id="valor" step="0.01" placeholder="75,50" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary" required>
+                            <!-- Campo de seleção de serviços (para receitas) -->
+                            <div id="servico-container">
+                                <label for="servico-select" class="block text-sm font-medium">Serviço Prestado</label>
+                                <select id="servico-select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary"></select>
                             </div>
-                            <div>
-                                <label for="data" class="block text-sm font-medium text-gray-700">Data</label>
-                                <input type="date" id="data" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary" required>
-                            </div>
-                            
-                            <div id="campo-servico" class="sm:col-span-2">
-                                 <label for="servico" class="block text-sm font-medium text-gray-700">Serviço Prestado</label>
-                                 <select id="servico" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary"></select>
+                            <!-- Campo de descrição (para despesas e outras receitas) -->
+                            <div id="descricao-container" class="hidden">
+                                <label for="descricao" class="block text-sm font-medium">Descrição</label>
+                                <input type="text" id="descricao" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary">
                             </div>
 
-                             <div id="campo-categoria-despesa" class="sm:col-span-2 hidden">
-                                <label for="categoria-despesa" class="block text-sm font-medium text-gray-700">Categoria da Despesa</label>
-                                <select id="categoria-despesa" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary">
-                                    <option>Material de Trabalho</option>
-                                    <option>Aluguel/Contas Fixas</option>
-                                    <option>Marketing/Divulgação</option>
-                                    <option>Transporte</option>
+                             <!-- Campo de Categoria para Despesas -->
+                            <div id="categoria-despesa-container" class="hidden">
+                                <label for="categoria-despesa" class="block text-sm font-medium">Categoria da Despesa</label>
+                                <select id="categoria-despesa" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary">
+                                    <option>Material</option>
+                                    <option>Aluguel/Contas</option>
+                                    <option>Marketing</option>
                                     <option>Alimentação</option>
+                                    <option>Transporte</option>
                                     <option>Outros</option>
                                 </select>
-                             </div>
-                            
-                            <div id="campo-descricao" class="sm:col-span-1">
-                                 <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
-                                 <input type="text" id="descricao" placeholder="Ex: Compra de jumbo" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-brand-primary focus:border-brand-primary">
                             </div>
-                        </div>
-                        <div class="pt-2">
-                             <button type="submit" class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light transition-colors">
-                                Adicionar Lançamento
-                            </button>
-                        </div>
-                    </form>
-                </section>
 
-                <!-- Análise Visual -->
-                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
-                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Análise Visual do Mês</h2>
-                    <div class="space-y-8">
-                        <div>
-                            <h3 class="text-lg font-semibold text-center text-brand-dark mb-2">Receitas vs. Despesas</h3>
-                            <canvas id="fluxoCaixaChart"></canvas>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-                             <div>
-                                <h3 class="text-lg font-semibold text-center text-brand-dark mb-2">Composição das Despesas</h3>
-                                <canvas id="despesasChart"></canvas>
+                            <div>
+                                <label for="valor" class="block text-sm font-medium">Valor (R$)</label>
+                                <input type="text" inputmode="decimal" id="valor" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary" required>
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold text-center text-brand-dark mb-2">Serviços Mais Rentáveis</h3>
-                                <canvas id="servicosChart"></canvas>
+                                <label for="data" class="block text-sm font-medium">Data</label>
+                                <input type="date" id="data" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary" required>
+                            </div>
+                            <button type="submit" class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-dark transition-colors">Adicionar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Coluna de Histórico e Gráficos -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4 border-b pb-3">Últimos Lançamentos</h2>
+                        <div id="transaction-list" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Lançamentos aqui -->
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4 border-b pb-3">Análise Visual</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                               <h3 class="text-center font-semibold text-gray-600 mb-2">Receitas x Despesas (dia a dia)</h3>
+                               <canvas id="fluxoCaixaChart"></canvas>
+                            </div>
+                            <div>
+                               <h3 class="text-center font-semibold text-gray-600 mb-2">Composição das Despesas</h3>
+                               <canvas id="despesasChart"></canvas>
                             </div>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Histórico de Lançamentos -->
-                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
-                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Histórico de Lançamentos</h2>
-                    <div id="transactionList" class="space-y-3">
-                        <p id="empty-transactions" class="text-center text-gray-500 py-4">Nenhum lançamento adicionado ainda.</p>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Coluna da Direita: Metas e Investimentos -->
-            <div class="lg:col-span-1 space-y-8">
-                <section class="bg-brand-bg-light p-6 rounded-2xl shadow-lg">
-                    <h2 class="text-2xl font-semibold text-brand-dark mb-4 border-b border-brand-light pb-2">Metas e Investimentos</h2>
-                    <form id="goalForm" class="space-y-4 mb-6">
-                        <div>
-                            <label for="goal-desc" class="block text-sm font-medium text-gray-700">Descrição da Meta</label>
-                            <input type="text" id="goal-desc" placeholder="Ex: Cadeira de salão nova" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary" required>
-                        </div>
-                        <div>
-                            <label for="goal-total" class="block text-sm font-medium text-gray-700">Valor Total (R$)</label>
-                            <input type="number" step="0.01" id="goal-total" placeholder="1500,00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-primary focus:border-brand-primary" required>
-                        </div>
-                        <button type="submit" class="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark transition-colors">Adicionar Meta</button>
-                    </form>
-
-                    <div id="goalList" class="space-y-4">
-                         <p id="empty-goals" class="text-center text-gray-500 py-4">Nenhuma meta criada ainda.</p>
-                    </div>
-                </section>
-            </div>
-        </main>
-        
-        <footer class="text-center mt-8 text-gray-400 text-sm">
-            <p>Desenvolvido para Fiozart</p>
-        </footer>
-    </div>
-    
-    <!-- Modal de Gerenciamento de Catálogo -->
-    <div id="catalogModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
-        <div class="modal-backdrop fixed inset-0" id="modalBackdrop"></div>
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg m-4 p-6 z-10">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-brand-dark">Gerenciar Catálogo de Serviços</h2>
-                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-            </div>
-
-            <!-- Formulário para adicionar/editar serviço -->
-            <form id="serviceForm" class="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                <h3 id="serviceFormTitle" class="text-lg font-semibold text-brand-dark">Adicionar Novo Serviço</h3>
-                <input type="hidden" id="serviceId">
-                <div>
-                    <label for="serviceName" class="block text-sm font-medium text-gray-700">Nome do Serviço</label>
-                    <input type="text" id="serviceName" class="mt-1 block w-full border-gray-300 rounded-md" required>
+                     </div>
                 </div>
-                <div>
-                    <label for="serviceValue" class="block text-sm font-medium text-gray-700">Valor Padrão (R$)</label>
-                    <input type="number" step="0.01" id="serviceValue" class="mt-1 block w-full border-gray-300 rounded-md" required>
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" id="saveServiceBtn" class="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark transition-colors">Salvar</button>
-                    <button type="button" id="cancelEditBtn" class="w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors hidden">Cancelar Edição</button>
-                </div>
+            </div>
+        </div>
+
+        <!-- VISÃO DA AGENDA (OCULTA) -->
+        <div id="agendaView" class="hidden">
+            <section class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                <div id='calendario'></div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Modal de Gerenciamento do Catálogo -->
+    <div id="catalogModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-30">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h2 class="text-xl font-bold">Gerenciar Catálogo de Serviços</h2>
+                <button id="closeCatalogBtn" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="catalog-form" class="flex gap-2 mb-4">
+                <input type="text" id="servico-nome" placeholder="Nome do serviço" class="flex-grow border-gray-300 rounded-md shadow-sm" required>
+                <input type="text" inputmode="decimal" id="servico-valor" placeholder="Valor (R$)" class="w-32 border-gray-300 rounded-md shadow-sm" required>
+                <button type="submit" class="bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-dark">+</button>
             </form>
-
-            <!-- Lista de serviços -->
-            <h3 class="text-lg font-semibold text-brand-dark mb-2">Serviços Cadastrados</h3>
-            <div id="serviceList" class="space-y-2 max-h-64 overflow-y-auto pr-2">
-                <!-- Serviços serão inseridos aqui -->
+            <div id="catalog-list" class="space-y-2 max-h-64 overflow-y-auto">
+                <!-- Lista de serviços do catálogo -->
             </div>
         </div>
     </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- ELEMENTOS DO DOM ---
-    const transactionForm = document.getElementById('transactionForm');
-    const totalReceitasEl = document.getElementById('totalReceitas');
-    const totalDespesasEl = document.getElementById('totalDespesas');
-    const saldoTotalEl = document.getElementById('saldoTotal');
-    const transactionListEl = document.getElementById('transactionList');
-    const dataInput = document.getElementById('data');
-    const tipoSelect = document.getElementById('tipo');
-    const valorInput = document.getElementById('valor');
-    const servicoSelect = document.getElementById('servico');
-    const categoriaDespesaSelect = document.getElementById('categoria-despesa');
-    const descricaoInput = document.getElementById('descricao');
-    const campoServico = document.getElementById('campo-servico');
-    const campoCategoriaDespesa = document.getElementById('campo-categoria-despesa');
-    const campoDescricao = document.getElementById('campo-descricao');
-    const monthFilter = document.getElementById('monthFilter');
-    const goalForm = document.getElementById('goalForm');
-    const goalListEl = document.getElementById('goalList');
-    const emptyGoalsEl = document.getElementById('empty-goals');
     
-    // --- Elementos do Modal de Catálogo ---
-    const catalogModal = document.getElementById('catalogModal');
-    const manageCatalogBtn = document.getElementById('manageCatalogBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const serviceForm = document.getElementById('serviceForm');
-    const serviceFormTitle = document.getElementById('serviceFormTitle');
-    const serviceIdInput = document.getElementById('serviceId');
-    const serviceNameInput = document.getElementById('serviceName');
-    const serviceValueInput = document.getElementById('serviceValue');
-    const saveServiceBtn = document.getElementById('saveServiceBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-    const serviceListEl = document.getElementById('serviceList');
-
-    // --- GRÁFICOS ---
-    const ctxFluxo = document.getElementById('fluxoCaixaChart').getContext('2d');
-    const ctxDespesas = document.getElementById('despesasChart').getContext('2d');
-    const ctxServicos = document.getElementById('servicosChart').getContext('2d');
-    let fluxoChart, despesasChart, servicosChart;
-
-    // --- FUNÇÕES DE ARMAZENAMENTO ---
-    const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(allTransactions));
-    const saveGoals = () => localStorage.setItem('fiozart_goals', JSON.stringify(goals));
-    const saveCatalogo = () => localStorage.setItem('fiozart_catalogo', JSON.stringify(catalogoServicos));
-    const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-    // --- CARREGAMENTO DE DADOS DO LOCALSTORAGE ---
-    let allTransactions = JSON.parse(localStorage.getItem('fiozart_transactions')) || [];
-    let goals = JSON.parse(localStorage.getItem('fiozart_goals')) || [];
-    let catalogoServicos = JSON.parse(localStorage.getItem('fiozart_catalogo'));
-
-    // --- INICIALIZAÇÃO DO CATÁLOGO PADRÃO (SE FOR A PRIMEIRA VEZ) ---
-    if (!catalogoServicos || catalogoServicos.length === 0) {
-        catalogoServicos = [
-            { id: Date.now() + 1, nome: 'Box Braids (Tradicional)', valor: 250.00 },
-            { id: Date.now() + 2, nome: 'Nagô (Lateral)', valor: 80.00 },
-            { id: Date.now() + 3, nome: 'Twist', valor: 220.00 },
-            { id: Date.now() + 4, nome: 'Mão de Obra (cliente c/ material)', valor: 120.00 },
-        ];
-        saveCatalogo();
-    }
-    
-    // --- LÓGICA DE GERENCIAMENTO DO CATÁLOGO ---
-    const openCatalogModal = () => catalogModal.classList.remove('hidden');
-    const closeCatalogModal = () => catalogModal.classList.add('hidden');
-
-    const resetServiceForm = () => {
-        serviceForm.reset();
-        serviceIdInput.value = '';
-        serviceFormTitle.textContent = 'Adicionar Novo Serviço';
-        saveServiceBtn.textContent = 'Salvar';
-        cancelEditBtn.classList.add('hidden');
-    };
-    
-    const renderCatalogList = () => {
-        serviceListEl.innerHTML = '';
-        if (catalogoServicos.length === 0) {
-            serviceListEl.innerHTML = `<p class="text-sm text-gray-500 text-center">Nenhum serviço cadastrado.</p>`;
-            return;
-        }
-        catalogoServicos.forEach(service => {
-            const item = document.createElement('div');
-            item.className = 'flex justify-between items-center p-2 border rounded-md';
-            item.innerHTML = `
+    <!-- Modal de Agendamento -->
+    <div id="agendamentoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-40">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h2 class="text-xl font-bold" id="agendamentoModalTitle">Novo Agendamento</h2>
+                <button id="closeAgendamentoBtn" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="agendamento-form" class="space-y-4">
+                <input type="hidden" id="agendamentoId">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-1">
+                        <label for="agendamento-data" class="block text-sm font-medium">Data</label>
+                        <input type="date" id="agendamento-data" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <label for="agendamento-hora-inicio" class="block text-sm font-medium">Início</label>
+                        <input type="time" id="agendamento-hora-inicio" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <label for="agendamento-hora-fim" class="block text-sm font-medium">Fim</label>
+                        <input type="time" id="agendamento-hora-fim" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                </div>
                 <div>
-                    <p class="font-semibold text-brand-dark">${service.nome}</p>
-                    <p class="text-sm text-gray-600">${formatCurrency(service.valor)}</p>
+                    <label for="agendamento-cliente-nome" class="block text-sm font-medium">Nome do Cliente</label>
+                    <input type="text" id="agendamento-cliente-nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="editService(${service.id})" class="text-sm text-blue-600 hover:text-blue-800">Editar</button>
-                    <button onclick="deleteService(${service.id})" class="text-sm text-red-600 hover:text-red-800">Excluir</button>
-                </div>
-            `;
-            serviceListEl.appendChild(item);
-        });
-    };
-
-    const handleSaveService = (e) => {
-        e.preventDefault();
-        const id = serviceIdInput.value ? Number(serviceIdInput.value) : null;
-        const nome = serviceNameInput.value;
-        const valor = parseFloat(serviceValueInput.value);
-
-        if (!nome.trim() || isNaN(valor)) {
-            alert('Por favor, preencha os campos corretamente.');
-            return;
-        }
-
-        if (id) { // Editando
-            const serviceIndex = catalogoServicos.findIndex(s => s.id === id);
-            if (serviceIndex > -1) {
-                catalogoServicos[serviceIndex] = { id, nome, valor };
-            }
-        } else { // Adicionando
-            catalogoServicos.push({ id: Date.now(), nome, valor });
-        }
-
-        saveCatalogo();
-        renderCatalogList();
-        popularCatalogoNoForm();
-        resetServiceForm();
-    };
-
-    window.editService = (id) => {
-        const service = catalogoServicos.find(s => s.id === id);
-        if (service) {
-            serviceIdInput.value = service.id;
-            serviceNameInput.value = service.nome;
-            serviceValueInput.value = service.valor.toFixed(2);
-            serviceFormTitle.textContent = 'Editar Serviço';
-            saveServiceBtn.textContent = 'Salvar Alterações';
-            cancelEditBtn.classList.remove('hidden');
-            serviceNameInput.focus();
-        }
-    };
-    
-    window.deleteService = (id) => {
-        if (confirm('Tem certeza que deseja excluir este serviço do catálogo?')) {
-            catalogoServicos = catalogoServicos.filter(s => s.id !== id);
-            saveCatalogo();
-            renderCatalogList();
-            popularCatalogoNoForm();
-        }
-    };
-    
-    const popularCatalogoNoForm = () => {
-        servicoSelect.innerHTML = '<option value="" data-valor="0">-- Selecione um serviço --</option>';
-        catalogoServicos.forEach(servico => {
-            const option = document.createElement('option');
-            option.value = servico.nome;
-            option.dataset.valor = servico.valor;
-            option.textContent = servico.nome;
-            servicoSelect.appendChild(option);
-        });
-        const outroOption = document.createElement('option');
-        outroOption.value = 'Outro (descrever manualmente)';
-        outroOption.dataset.valor = 0;
-        outroOption.textContent = 'Outro (descrever manualmente)';
-        servicoSelect.appendChild(outroOption);
-    };
-
-    // --- RESTANTE DAS FUNÇÕES (Dashboard, Transações, Metas, Gráficos) ---
-    const updateDashboard = () => {
-        const selectedMonth = monthFilter.value;
-        const transactions = allTransactions.filter(t => t.data.startsWith(selectedMonth));
-        const receitas = transactions.filter(t => t.tipo === 'receita').reduce((acc, t) => acc + t.valor, 0);
-        const despesas = transactions.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + t.valor, 0);
-        const saldo = receitas - despesas;
-        totalReceitasEl.textContent = formatCurrency(receitas);
-        totalDespesasEl.textContent = formatCurrency(despesas);
-        saldoTotalEl.textContent = formatCurrency(saldo);
-        saldoTotalEl.classList.remove('text-green-600', 'text-red-600', 'text-blue-600');
-        saldoTotalEl.classList.add(saldo >= 0 ? 'text-green-600' : 'text-red-600');
-        renderTransactions(transactions);
-        updateCharts(transactions);
-    };
-
-    const renderTransactions = (transactionsToRender) => {
-        transactionListEl.innerHTML = "";
-        if (transactionsToRender.length === 0) {
-            transactionListEl.innerHTML = `<p class="text-center text-gray-500 py-4">Nenhum lançamento neste mês.</p>`;
-            return;
-        }
-        [...transactionsToRender].sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(t => {
-            const isExpense = t.tipo === 'despesa';
-            const item = document.createElement("div");
-            item.className = `flex items-center justify-between p-3 rounded-lg border ${isExpense ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`;
-            item.innerHTML = `
                 <div>
-                    <p class="font-semibold text-brand-dark">${t.descricao}</p>
-                    <p class="text-sm text-gray-500">${new Date(t.data + "T00:00:00-03:00").toLocaleDateString("pt-BR")}</p>
+                    <label for="agendamento-cliente-contato" class="block text-sm font-medium">Contato (Telefone/WhatsApp)</label>
+                    <input type="text" id="agendamento-cliente-contato" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 </div>
-                <div class="text-right">
-                    <p class="font-bold ${isExpense ? "text-red-600" : "text-green-600"}">${isExpense ? "-" : "+"} ${formatCurrency(t.valor)}</p>
-                    <button onclick="deleteTransaction(${t.id})" class="text-xs text-gray-400 hover:text-red-500 transition-colors mt-1">Excluir</button>
-                </div>`;
-            transactionListEl.appendChild(item);
-        });
-    };
-
-    const addTransaction = (e) => {
-        e.preventDefault();
-        const tipo = tipoSelect.value;
-        const valor = parseFloat(valorInput.value);
-        const data = dataInput.value;
-        let descricao;
-        let categoria = null;
-        if (tipo === 'receita') {
-            const servicoSelecionado = servicoSelect.value;
-            if (servicoSelecionado === 'Outro (descrever manualmente)') {
-                descricao = descricaoInput.value;
-            } else if (servicoSelecionado) {
-                descricao = servicoSelecionado;
-            } else {
-                alert("Por favor, selecione um serviço.");
-                return;
-            }
-        } else {
-            categoria = categoriaDespesaSelect.value;
-            descricao = descricaoInput.value || categoria;
-        }
-        if (!descricao.trim() || isNaN(valor) || valor <= 0) {
-            alert("Por favor, preencha a descrição e o valor corretamente.");
-            return;
-        }
-        allTransactions.push({ id: Date.now(), descricao, valor, tipo, data, categoria });
-        saveTransactions();
-        monthFilter.value = data.substring(0, 7);
-        updateDashboard();
-        transactionForm.reset();
-        dataInput.valueAsDate = new Date();
-        toggleTransactionFields();
-    };
-
-    window.deleteTransaction = (id) => {
-        if (confirm("Deseja excluir este lançamento?")) {
-            allTransactions = allTransactions.filter(t => t.id !== id);
-            saveTransactions();
-            updateDashboard();
-        }
-    };
-
-    const toggleTransactionFields = () => {
-        const isReceita = tipoSelect.value === 'receita';
-        campoServico.classList.toggle('hidden', !isReceita);
-        campoCategoriaDespesa.classList.toggle('hidden', isReceita);
-        if (isReceita && servicoSelect.value !== 'Outro (descrever manualmente)') {
-            campoDescricao.classList.add('hidden');
-            descricaoInput.required = false;
-        } else {
-            campoDescricao.classList.remove('hidden');
-            descricaoInput.required = true;
-            descricaoInput.placeholder = isReceita ? 'Descrição da receita' : 'Ex: Compra de jumbo';
-        }
-    };
-
-    const updateCharts = (transactions) => {
-        const daysInMonth = new Date(monthFilter.value.split("-")[0], monthFilter.value.split("-")[1], 0).getDate();
-        const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-        const receitasPorDia = new Array(daysInMonth).fill(0);
-        const despesasPorDia = new Array(daysInMonth).fill(0);
-        transactions.forEach(t => {
-            const day = new Date(t.data + "T00:00:00-03:00").getDate() - 1;
-            if (t.tipo === 'receita') receitasPorDia[day] += t.valor;
-            else despesasPorDia[day] += t.valor;
-        });
-        if (fluxoChart) fluxoChart.destroy();
-        fluxoChart = new Chart(ctxFluxo, { type: "line", data: { labels, datasets: [{ label: "Receitas", data: receitasPorDia, borderColor: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", fill: true, tension: .3 }, { label: "Despesas", data: despesasPorDia, borderColor: "#dc2626", backgroundColor: "rgba(220, 38, 38, 0.1)", fill: true, tension: .3 }] } });
-        const despesasData = transactions.filter(t => t.tipo === 'despesa').reduce((acc, t) => {
-            acc[t.categoria] = (acc[t.categoria] || 0) + t.valor;
-            return acc;
-        }, {});
-        if (despesasChart) despesasChart.destroy();
-        despesasChart = new Chart(ctxDespesas, { type: "doughnut", data: { labels: Object.keys(despesasData), datasets: [{ data: Object.values(despesasData), backgroundColor: ["#8d5b4c", "#d4a373", "#4a2c2a", "#a16207", "#c2410c", "#facc15"] }] } });
-        const servicosData = transactions.filter(t => t.tipo === 'receita').reduce((acc, t) => {
-            acc[t.descricao] = (acc[t.descricao] || 0) + t.valor;
-            return acc;
-        }, {});
-        if (servicosChart) servicosChart.destroy();
-        servicosChart = new Chart(ctxServicos, { type: "bar", data: { labels: Object.keys(servicosData), datasets: [{ label: "Receita por Serviço", data: Object.values(servicosData), backgroundColor: "#8d5b4c", borderColor: "#4a2c2a", borderWidth: 1 }] }, options: { indexAxis: "y" } });
-    };
-
-    const renderGoals = () => {
-        goalListEl.innerHTML = "";
-        if (goals.length === 0) {
-            goalListEl.innerHTML = `<p id="empty-goals" class="text-center text-gray-500 py-4">Nenhuma meta criada ainda.</p>`;
-            return;
-        }
-        goals.forEach(t => {
-            const e = t.total > 0 ? t.guardado / t.total * 100 : 0;
-            const o = document.createElement("div");
-            o.className = "p-4 border border-brand-light/50 rounded-lg space-y-3 bg-white";
-            let n = t.compras.map((e, o) => `<li class="flex justify-between items-center text-sm text-gray-600"><span>- ${e}</span><button onclick="deleteShoppingItem(${t.id}, ${o})" class="text-red-400 hover:text-red-600">&times;</button></li>`).join("");
-            o.innerHTML = `<div class="flex justify-between items-start"><h3 class="font-bold text-brand-dark">${t.descricao}</h3><button onclick="deleteGoal(${t.id})" class="text-gray-400 hover:text-red-500 font-bold">&times;</button></div><div><div class="flex justify-between text-sm font-medium text-gray-600 mb-1"><span>${formatCurrency(t.guardado)}</span><span>${formatCurrency(t.total)}</span></div><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-brand-primary h-4 rounded-full" style="width: ${e}%"></div></div></div><div class="flex gap-2"><input type="number" step="0.01" id="add-amount-${t.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Adicionar valor"><button onclick="addAmountToGoal(${t.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div><div><h4 class="text-sm font-semibold text-gray-600 mt-2">Lista de Compras:</h4><ul class="list-none space-y-1 mt-1">${n||'<li class="text-xs text-gray-400">Nenhum item.</li>'}</ul><div class="flex gap-2 mt-2"><input type="text" id="add-shopping-${t.id}" class="w-full border-gray-300 rounded-md shadow-sm text-sm" placeholder="Item a comprar"><button onclick="addShoppingItem(${t.id})" class="bg-gray-200 text-gray-700 px-3 rounded-md hover:bg-gray-300 text-sm font-bold">+</button></div></div>`;
-            goalListEl.appendChild(o);
-        });
-    };
-
-    const addGoal = t => {
-        t.preventDefault();
-        const e = document.getElementById("goal-desc").value,
-            o = parseFloat(document.getElementById("goal-total").value);
-        if (e.trim() && !isNaN(o) && o > 0) {
-            goals.push({ id: Date.now(), descricao: e, total: o, guardado: 0, compras: [] });
-            saveGoals();
-            renderGoals();
-            goalForm.reset();
-        }
-    };
-
-    window.deleteGoal = t => {
-        if(confirm("Tem certeza?")){
-            goals = goals.filter(e => e.id !== t);
-            saveGoals();
-            renderGoals();
-        }
-    };
+                <div>
+                    <label for="agendamento-servico" class="block text-sm font-medium">Serviço Prestado</label>
+                    <select id="agendamento-servico" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="agendamento-valor" class="block text-sm font-medium">Valor Cobrado (R$)</label>
+                        <input type="text" inputmode="decimal" id="agendamento-valor" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="agendamento-status" class="block text-sm font-medium">Status</label>
+                        <select id="agendamento-status" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <option value="Agendado">Agendado</option>
+                            <option value="Confirmado">Confirmado</option>
+                            <option value="Realizado">Realizado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="modal-actions" class="flex flex-col sm:flex-row-reverse gap-3 pt-4">
+                    <button type="submit" id="saveAgendamentoBtn" class="w-full sm:w-auto bg-brand-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-brand-dark transition-colors">Salvar</button>
+                    <button type="button" id="deleteAgendamentoBtn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors hidden">Excluir</button>
+                    <button type="button" id="lancarReceitaBtn" class="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors hidden">Lançar como Receita</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
-    window.addAmountToGoal = t => {
-        const e = document.getElementById(`add-amount-${t}`),
-            o = parseFloat(e.value);
-        if (!isNaN(o) && o > 0) {
-            const n = goals.find(e => e.id === t);
-            if(n){
-                n.guardado += o;
-                saveGoals();
-                renderGoals();
-                e.value = "";
-            }
-        }
-    };
+    <!-- CDN Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENTOS DO DOM ---
+            const transactionForm = document.getElementById('transaction-form');
+            const valorInput = document.getElementById('valor');
+            const dataInput = document.getElementById('data');
+            const transactionList = document.getElementById('transaction-list');
+            const receitaMesEl = document.getElementById('receita-mes');
+            const despesaMesEl = document.getElementById('despesa-mes');
+            const lucroMesEl = document.getElementById('lucro-mes');
+            const btnReceita = document.getElementById('btn-receita');
+            const btnDespesa = document.getElementById('btn-despesa');
+            const servicoContainer = document.getElementById('servico-container');
+            const servicoSelect = document.getElementById('servico-select');
+            const descricaoContainer = document.getElementById('descricao-container');
+            const descricaoInput = document.getElementById('descricao');
+            const categoriaDespesaContainer = document.getElementById('categoria-despesa-container');
+            const categoriaDespesaSelect = document.getElementById('categoria-despesa');
 
-    window.addShoppingItem = t => {
-        const e = document.getElementById(`add-shopping-${t}`),
-            o = e.value.trim();
-        if (o) {
-            const n = goals.find(e => e.id === t);
-            if(n){
-                n.compras.push(o);
-                saveGoals();
-                renderGoals();
-                e.value = "";
-            }
-        }
-    };
+            // Catálogo
+            const openCatalogBtn = document.getElementById('openCatalogBtn');
+            const closeCatalogBtn = document.getElementById('closeCatalogBtn');
+            const catalogModal = document.getElementById('catalogModal');
+            const catalogForm = document.getElementById('catalog-form');
+            const servicoNomeInput = document.getElementById('servico-nome');
+            const servicoValorInput = document.getElementById('servico-valor');
+            const catalogList = document.getElementById('catalog-list');
 
-    window.deleteShoppingItem = (t, e) => {
-        const o = goals.find(o => o.id === t);
-        if(o){
-            o.compras.splice(e, 1);
-            saveGoals();
-            renderGoals();
-        }
-    };
+            // Agendamento
+            const toggleToAgendaBtn = document.getElementById('toggleToAgenda');
+            const toggleToFinanceiroBtn = document.getElementById('toggleToFinanceiro');
+            const financeiroView = document.getElementById('financeiroView');
+            const agendaView = document.getElementById('agendaView');
+            const calendarioEl = document.getElementById('calendario');
+            const agendamentoModal = document.getElementById('agendamentoModal');
+            const closeAgendamentoBtn = document.getElementById('closeAgendamentoBtn');
+            const agendamentoForm = document.getElementById('agendamento-form');
+            const agendamentoModalTitle = document.getElementById('agendamentoModalTitle');
+            const agendamentoIdInput = document.getElementById('agendamentoId');
+            const agendamentoDataInput = document.getElementById('agendamento-data');
+            const agendamentoHoraInicioInput = document.getElementById('agendamento-hora-inicio');
+            const agendamentoHoraFimInput = document.getElementById('agendamento-hora-fim');
+            const agendamentoClienteNomeInput = document.getElementById('agendamento-cliente-nome');
+            const agendamentoClienteContatoInput = document.getElementById('agendamento-cliente-contato');
+            const agendamentoServicoSelect = document.getElementById('agendamento-servico');
+            const agendamentoValorInput = document.getElementById('agendamento-valor');
+            const agendamentoStatusSelect = document.getElementById('agendamento-status');
+            const deleteAgendamentoBtn = document.getElementById('deleteAgendamentoBtn');
+            const lancarReceitaBtn = document.getElementById('lancarReceitaBtn');
 
-    // --- INICIALIZAÇÃO & EVENTOS ---
-    const init = () => {
-        const today = new Date();
-        monthFilter.value = today.toISOString().substring(0, 7);
-        dataInput.valueAsDate = today;
 
-        // Eventos principais
-        tipoSelect.addEventListener('change', toggleTransactionFields);
-        servicoSelect.addEventListener('change', (e) => {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const valorServico = parseFloat(selectedOption.dataset.valor);
-            valorInput.value = valorServico > 0 ? valorServico.toFixed(2) : '';
-            toggleTransactionFields();
+            // --- ESTADO DA APLICAÇÃO ---
+            let transactions = JSON.parse(localStorage.getItem('fiozart_transactions')) || [];
+            let catalogoServicos = JSON.parse(localStorage.getItem('fiozart_catalogo')) || [];
+            let agendamentos = JSON.parse(localStorage.getItem('fiozart_agendamentos')) || [];
+            let transactionType = 'receita';
+            let fluxoCaixaChart, despesasChart, calendar;
+
+            // --- FUNÇÕES UTILITÁRIAS ---
+            const formatCurrency = (value) => parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const parseValue = (value) => parseFloat(String(value).replace(',', '.')) || 0;
+
+            // --- FUNÇÕES DE ARMAZENAMENTO ---
+            const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(transactions));
+            const saveCatalogo = () => localStorage.setItem('fiozart_catalogo', JSON.stringify(catalogoServicos));
+            const saveAgendamentos = () => localStorage.setItem('fiozart_agendamentos', JSON.stringify(agendamentos));
+
+            // --- LÓGICA DE CATÁLOGO ---
+            const popularCatalogoNoForm = (selectElement) => {
+                selectElement.innerHTML = '<option value="">Selecione um serviço</option>';
+                catalogoServicos.forEach(servico => {
+                    const option = document.createElement('option');
+                    option.value = servico.nome;
+                    option.textContent = `${servico.nome} - ${formatCurrency(servico.valor)}`;
+                    option.dataset.valor = servico.valor;
+                    selectElement.appendChild(option);
+                });
+                if (transactionType === 'receita' && selectElement.id === 'servico-select') {
+                    const optionOutro = document.createElement('option');
+                    optionOutro.value = 'outro';
+                    optionOutro.textContent = 'Outro (descrever manualmente)';
+                    selectElement.appendChild(optionOutro);
+                }
+            };
+            
+            const renderCatalogoList = () => {
+                catalogList.innerHTML = '';
+                if (catalogoServicos.length === 0) {
+                    catalogList.innerHTML = '<p class="text-center text-gray-500 text-sm">Nenhum serviço cadastrado.</p>';
+                    return;
+                }
+                catalogoServicos.forEach(servico => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center p-2 border rounded-md';
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-semibold">${servico.nome}</p>
+                            <p class="text-sm text-gray-600">${formatCurrency(servico.valor)}</p>
+                        </div>
+                        <div>
+                            <button data-id="${servico.id}" class="edit-servico-btn text-blue-500 mr-2">Editar</button>
+                            <button data-id="${servico.id}" class="delete-servico-btn text-red-500">Excluir</button>
+                        </div>
+                    `;
+                    catalogList.appendChild(div);
+                });
+            };
+            
+            // --- LÓGICA FINANCEIRA ---
+            const addTransaction = (e) => {
+                if(e) e.preventDefault();
+
+                const valor = parseValue(valorInput.value);
+                const data = dataInput.value;
+                let descricao;
+                let categoria = null;
+
+                if (transactionType === 'receita') {
+                    if (servicoSelect.value === 'outro') {
+                        descricao = descricaoInput.value.trim();
+                    } else {
+                        descricao = servicoSelect.value;
+                    }
+                } else {
+                    descricao = descricaoInput.value.trim();
+                    categoria = categoriaDespesaSelect.value;
+                }
+
+                if (!descricao || !valor || !data) {
+                    alert('Por favor, preencha todos os campos.');
+                    return;
+                }
+
+                transactions.push({
+                    id: Date.now(),
+                    type: transactionType,
+                    description: descricao,
+                    amount: transactionType === 'receita' ? valor : -valor,
+                    date: data,
+                    category: categoria,
+                });
+
+                saveTransactions();
+                updateUI();
+                transactionForm.reset();
+                dataInput.value = new Date().toISOString().split('T')[0];
+                setTransactionType('receita');
+            };
+            
+            const deleteTransaction = (id) => {
+                transactions = transactions.filter(t => t.id !== id);
+                saveTransactions();
+                updateUI();
+            };
+
+            // --- LÓGICA DE AGENDAMENTO ---
+            const renderCalendario = () => {
+                const eventos = agendamentos.map(ag => {
+                    let color = '#8d5b4c'; // Padrão 'Agendado'
+                    if (ag.status === 'Confirmado') color = '#2563eb'; // Azul
+                    if (ag.status === 'Realizado') color = '#16a34a'; // Verde
+                    if (ag.status === 'Cancelado') color = '#dc2626'; // Vermelho
+
+                    return {
+                        id: ag.id,
+                        title: `${ag.clienteNome} - ${ag.servicoNome}`,
+                        start: `${ag.data}T${ag.horaInicio}`,
+                        end: `${ag.data}T${ag.horaFim}`,
+                        backgroundColor: color,
+                        borderColor: color,
+                        extendedProps: { ...ag }
+                    };
+                });
+
+                if(calendar) {
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(eventos);
+                } else {
+                     calendar = new FullCalendar.Calendar(calendarioEl, {
+                        locale: 'pt-br',
+                        initialView: 'dayGridMonth',
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        },
+                        events: eventos,
+                        dateClick: (info) => {
+                            agendamentoForm.reset();
+                            agendamentoModalTitle.textContent = "Novo Agendamento";
+                            agendamentoIdInput.value = '';
+                            agendamentoDataInput.value = info.dateStr;
+                            deleteAgendamentoBtn.classList.add('hidden');
+                            lancarReceitaBtn.classList.add('hidden');
+                            agendamentoModal.classList.remove('hidden');
+                        },
+                        eventClick: (info) => {
+                            const ag = info.event.extendedProps;
+                            agendamentoForm.reset();
+                            agendamentoModalTitle.textContent = "Editar Agendamento";
+                            agendamentoIdInput.value = ag.id;
+                            agendamentoDataInput.value = ag.data;
+                            agendamentoHoraInicioInput.value = ag.horaInicio;
+                            agendamentoHoraFimInput.value = ag.horaFim;
+                            agendamentoClienteNomeInput.value = ag.clienteNome;
+                            agendamentoClienteContatoInput.value = ag.clienteContato;
+                            agendamentoServicoSelect.value = ag.servicoNome;
+                            agendamentoValorInput.value = ag.valorCobrado;
+                            agendamentoStatusSelect.value = ag.status;
+                            
+                            deleteAgendamentoBtn.classList.remove('hidden');
+                            
+                            if(ag.status === 'Realizado' && !ag.receitaLancada) {
+                                lancarReceitaBtn.classList.remove('hidden');
+                                lancarReceitaBtn.disabled = false;
+                                lancarReceitaBtn.textContent = 'Lançar como Receita';
+                            } else if (ag.receitaLancada) {
+                                 lancarReceitaBtn.classList.remove('hidden');
+                                 lancarReceitaBtn.disabled = true;
+                                 lancarReceitaBtn.textContent = 'Receita Lançada';
+                            } else {
+                                lancarReceitaBtn.classList.add('hidden');
+                            }
+                            
+                            agendamentoModal.classList.remove('hidden');
+                        }
+                    });
+                    calendar.render();
+                }
+            };
+            
+            const handleSaveAgendamento = (e) => {
+                e.preventDefault();
+                const id = parseInt(agendamentoIdInput.value);
+                
+                const agendamento = {
+                    id: id || Date.now(),
+                    data: agendamentoDataInput.value,
+                    horaInicio: agendamentoHoraInicioInput.value,
+                    horaFim: agendamentoHoraFimInput.value,
+                    clienteNome: agendamentoClienteNomeInput.value.trim(),
+                    clienteContato: agendamentoClienteContatoInput.value.trim(),
+                    servicoNome: agendamentoServicoSelect.value,
+                    valorCobrado: parseValue(agendamentoValorInput.value),
+                    status: agendamentoStatusSelect.value,
+                };
+                
+                if (!agendamento.data || !agendamento.horaInicio || !agendamento.horaFim || !agendamento.clienteNome || !agendamento.servicoNome || !agendamento.valorCobrado) {
+                     alert('Por favor, preencha os campos obrigatórios.');
+                     return;
+                }
+
+                if (id) { // Editando
+                    const index = agendamentos.findIndex(ag => ag.id === id);
+                    agendamentos[index] = {...agendamentos[index], ...agendamento};
+                } else { // Novo
+                    agendamentos.push(agendamento);
+                }
+
+                saveAgendamentos();
+                renderCalendario();
+                agendamentoModal.classList.add('hidden');
+            };
+
+            const handleDeleteAgendamento = () => {
+                const id = parseInt(agendamentoIdInput.value);
+                if (id && confirm('Tem certeza que deseja excluir este agendamento?')) {
+                    agendamentos = agendamentos.filter(ag => ag.id !== id);
+                    saveAgendamentos();
+                    renderCalendario();
+                    agendamentoModal.classList.add('hidden');
+                }
+            };
+            
+            const handleLancarReceita = () => {
+                const id = parseInt(agendamentoIdInput.value);
+                const ag = agendamentos.find(a => a.id === id);
+                if (!ag) return;
+
+                transactions.push({
+                    id: Date.now(),
+                    type: 'receita',
+                    description: `Serviço: ${ag.servicoNome} (Cliente: ${ag.clienteNome})`,
+                    amount: ag.valorCobrado,
+                    date: ag.data,
+                    category: 'Agendamento',
+                    agendamentoId: ag.id // Link para o agendamento
+                });
+                
+                // Marcar que a receita foi lançada para evitar duplicidade
+                ag.receitaLancada = true;
+                const index = agendamentos.findIndex(a => a.id === id);
+                agendamentos[index] = ag;
+
+                saveTransactions();
+                saveAgendamentos();
+                updateUI();
+                
+                lancarReceitaBtn.disabled = true;
+                lancarReceitaBtn.textContent = 'Receita Lançada';
+                alert('Receita lançada com sucesso no financeiro!');
+            };
+
+
+            // --- ATUALIZAÇÃO DA UI ---
+            const updateUI = () => {
+                // Filtra transações pelo mês atual (exemplo)
+                const hoje = new Date();
+                const mesAtual = hoje.getMonth();
+                const anoAtual = hoje.getFullYear();
+
+                const transactionsDoMes = transactions.filter(t => {
+                    const dataT = new Date(t.date);
+                    return dataT.getMonth() === mesAtual && dataT.getFullYear() === anoAtual;
+                });
+
+                transactionList.innerHTML = '';
+                if (transactionsDoMes.length === 0) {
+                    transactionList.innerHTML = '<p class="text-center text-gray-500">Nenhum lançamento este mês.</p>';
+                } else {
+                   [...transactionsDoMes].reverse().forEach(t => {
+                        const div = document.createElement('div');
+                        const amountClass = t.amount > 0 ? 'text-green-600' : 'text-red-600';
+                        const sign = t.amount > 0 ? '+' : '';
+                        div.className = 'flex justify-between items-center p-3 rounded-lg hover:bg-gray-50';
+                        div.innerHTML = `
+                            <div>
+                                <p class="font-semibold">${t.description}</p>
+                                <p class="text-sm text-gray-500">${new Date(t.date + 'T00:00:00-03:00').toLocaleDateString('pt-BR')}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="font-bold text-lg ${amountClass}">${sign} ${formatCurrency(t.amount)}</span>
+                                <button onclick="window.deleteTransaction(${t.id})" class="ml-4 text-gray-400 hover:text-red-500 font-bold"> &times; </button>
+                            </div>
+                        `;
+                        transactionList.appendChild(div);
+                    });
+                }
+                
+                const receitas = transactionsDoMes.filter(t => t.type === 'receita').reduce((acc, t) => acc + t.amount, 0);
+                const despesas = transactionsDoMes.filter(t => t.type === 'despesa').reduce((acc, t) => acc + t.amount, 0);
+                const lucro = receitas + despesas;
+
+                receitaMesEl.textContent = formatCurrency(receitas);
+                despesaMesEl.textContent = formatCurrency(Math.abs(despesas));
+                lucroMesEl.textContent = formatCurrency(lucro);
+                lucroMesEl.classList.toggle('text-red-600', lucro < 0);
+                lucroMesEl.classList.toggle('text-brand-dark', lucro >= 0);
+
+                popularCatalogoNoForm(servicoSelect);
+                popularCatalogoNoForm(agendamentoServicoSelect);
+                renderCatalogoList();
+                renderCharts(transactionsDoMes);
+            };
+
+            const setTransactionType = (type) => {
+                transactionType = type;
+                if (type === 'receita') {
+                    btnReceita.className = 'w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg';
+                    btnDespesa.className = 'w-full bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg';
+                    servicoContainer.style.display = 'block';
+                    categoriaDespesaContainer.classList.add('hidden');
+                    handleServicoChange(); // Chama para ajustar a visibilidade da descrição
+                } else {
+                    btnDespesa.className = 'w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg';
+                    btnReceita.className = 'w-full bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg';
+                    servicoContainer.style.display = 'none';
+                    descricaoContainer.classList.remove('hidden');
+                    categoriaDespesaContainer.classList.remove('hidden');
+                }
+            };
+            
+            const handleServicoChange = () => {
+                if (servicoSelect.value === 'outro') {
+                    descricaoContainer.classList.remove('hidden');
+                    valorInput.value = '';
+                    valorInput.readOnly = false;
+                } else if (servicoSelect.value) {
+                    descricaoContainer.classList.add('hidden');
+                    const selectedOption = servicoSelect.options[servicoSelect.selectedIndex];
+                    valorInput.value = selectedOption.dataset.valor || '';
+                    valorInput.readOnly = false; // Permite edição
+                } else {
+                    descricaoContainer.classList.add('hidden');
+                    valorInput.value = '';
+                    valorInput.readOnly = false;
+                }
+            };
+            
+            const handleAgendamentoServicoChange = () => {
+                const selectedOption = agendamentoServicoSelect.options[agendamentoServicoSelect.selectedIndex];
+                if (selectedOption && selectedOption.dataset.valor) {
+                    agendamentoValorInput.value = selectedOption.dataset.valor;
+                } else {
+                    agendamentoValorInput.value = '';
+                }
+            };
+
+
+            // --- LÓGICA DE GRÁFICOS ---
+            const renderCharts = (data) => {
+                // Gráfico de Fluxo de Caixa
+                const labels = [...new Set(data.map(t => t.date))].sort();
+                const receitaData = labels.map(label => 
+                    data.filter(t => t.date === label && t.type === 'receita').reduce((sum, t) => sum + t.amount, 0)
+                );
+                const despesaData = labels.map(label => 
+                    data.filter(t => t.date === label && t.type === 'despesa').reduce((sum, t) => sum + Math.abs(t.amount), 0)
+                );
+
+                if(fluxoCaixaChart) fluxoCaixaChart.destroy();
+                fluxoCaixaChart = new Chart(document.getElementById('fluxoCaixaChart'), {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Receitas',
+                            data: receitaData,
+                            borderColor: 'rgb(22, 163, 74)',
+                            tension: 0.1
+                        }, {
+                            label: 'Despesas',
+                            data: despesaData,
+                            borderColor: 'rgb(220, 38, 38)',
+                            tension: 0.1
+                        }]
+                    }
+                });
+
+                // Gráfico de Despesas por Categoria
+                const despesas = data.filter(t => t.type === 'despesa');
+                const categorias = [...new Set(despesas.map(d => d.category))];
+                const despesasPorCategoria = categorias.map(cat => 
+                    despesas.filter(d => d.category === cat).reduce((sum, d) => sum + Math.abs(d.amount), 0)
+                );
+                if (despesasPorCategoria.length === 0) { // Adiciona dado placeholder se não houver despesas
+                    categorias.push("Nenhuma Despesa");
+                    despesasPorCategoria.push(1);
+                }
+
+                if(despesasChart) despesasChart.destroy();
+                despesasChart = new Chart(document.getElementById('despesasChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: categorias,
+                        datasets: [{
+                            label: 'Despesas por Categoria',
+                            data: despesasPorCategoria,
+                            backgroundColor: ['#8d5b4c', '#d4a373', '#4a2c2a', '#a1a1aa', '#71717a', '#fdf8f0'],
+                            hoverOffset: 4
+                        }]
+                    }
+                });
+            };
+            
+            // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+            const init = () => {
+                // Expor função globalmente
+                window.deleteTransaction = deleteTransaction;
+
+                // Listeners financeiros
+                transactionForm.addEventListener('submit', addTransaction);
+                btnReceita.addEventListener('click', () => setTransactionType('receita'));
+                btnDespesa.addEventListener('click', () => setTransactionType('despesa'));
+                servicoSelect.addEventListener('change', handleServicoChange);
+                dataInput.value = new Date().toISOString().split('T')[0];
+                
+                // Listeners do Catálogo
+                openCatalogBtn.addEventListener('click', () => catalogModal.classList.remove('hidden'));
+                closeCatalogBtn.addEventListener('click', () => catalogModal.classList.add('hidden'));
+                catalogForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const nome = servicoNomeInput.value.trim();
+                    const valor = parseValue(servicoValorInput.value);
+                    const id = parseInt(catalogForm.dataset.editingId);
+
+                    if (!nome || !valor) return;
+
+                    if (id) { // Editando
+                        const index = catalogoServicos.findIndex(s => s.id === id);
+                        catalogoServicos[index] = { id, nome, valor };
+                        delete catalogForm.dataset.editingId;
+                    } else { // Novo
+                        catalogoServicos.push({ id: Date.now(), nome, valor });
+                    }
+                    
+                    saveCatalogo();
+                    updateUI();
+                    catalogForm.reset();
+                });
+
+                catalogList.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    if (e.target.classList.contains('delete-servico-btn')) {
+                        if (confirm('Tem certeza?')) {
+                            catalogoServicos = catalogoServicos.filter(s => s.id !== id);
+                            saveCatalogo();
+                            updateUI();
+                        }
+                    } else if (e.target.classList.contains('edit-servico-btn')) {
+                        const servico = catalogoServicos.find(s => s.id === id);
+                        servicoNomeInput.value = servico.nome;
+                        servicoValorInput.value = servico.valor;
+                        catalogForm.dataset.editingId = id;
+                    }
+                });
+
+                // Listeners da Agenda
+                toggleToAgendaBtn.addEventListener('click', () => {
+                    financeiroView.classList.add('hidden');
+                    agendaView.classList.remove('hidden');
+                    toggleToAgendaBtn.classList.add('hidden');
+                    toggleToFinanceiroBtn.classList.remove('hidden');
+                    renderCalendario(); // Renderiza ou re-renderiza o calendário ao mudar para a visão
+                });
+                toggleToFinanceiroBtn.addEventListener('click', () => {
+                    agendaView.classList.add('hidden');
+                    financeiroView.classList.remove('hidden');
+                    toggleToFinanceiroBtn.classList.add('hidden');
+                    toggleToAgendaBtn.classList.remove('hidden');
+                    updateUI(); // Atualiza os dados financeiros ao voltar
+                });
+                closeAgendamentoBtn.addEventListener('click', () => agendamentoModal.classList.add('hidden'));
+                agendamentoForm.addEventListener('submit', handleSaveAgendamento);
+                deleteAgendamentoBtn.addEventListener('click', handleDeleteAgendamento);
+                lancarReceitaBtn.addEventListener('click', handleLancarReceita);
+                agendamentoServicoSelect.addEventListener('change', handleAgendamentoServicoChange);
+
+                setTransactionType('receita');
+                updateUI();
+            };
+
+            init();
         });
-        transactionForm.addEventListener('submit', addTransaction);
-        goalForm.addEventListener('submit', addGoal);
-        monthFilter.addEventListener('change', updateDashboard);
-        
-        // Eventos do Modal de Catálogo
-        manageCatalogBtn.addEventListener('click', () => {
-            renderCatalogList();
-            openCatalogModal();
-        });
-        closeModalBtn.addEventListener('click', closeCatalogModal);
-        modalBackdrop.addEventListener('click', closeCatalogModal);
-        serviceForm.addEventListener('submit', handleSaveService);
-        cancelEditBtn.addEventListener('click', resetServiceForm);
-
-        // Inicialização dos dados
-        popularCatalogoNoForm();
-        toggleTransactionFields();
-        updateDashboard();
-        renderGoals();
-    };
-
-    init();
-});
-</script>
+    </script>
 </body>
 </html>
-
