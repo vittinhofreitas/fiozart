@@ -66,6 +66,17 @@
         .fc .fc-daygrid-day-number {
              color: #8d5b4c;
         }
+        .progress-bar {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+            height: 1rem;
+        }
+        .progress-bar-inner {
+            background-color: #16a34a;
+            height: 100%;
+            transition: width 0.3s ease-in-out;
+        }
     </style>
 </head>
 
@@ -169,10 +180,24 @@
                 <div class="lg:col-span-2 space-y-6">
                     <div class="bg-white p-6 rounded-xl shadow-md">
                         <h2 class="text-xl font-bold mb-4 border-b pb-3">Últimos Lançamentos</h2>
-                        <div id="transaction-list" class="space-y-3 max-h-96 overflow-y-auto">
+                        <div id="transaction-list" class="space-y-3 max-h-60 overflow-y-auto">
                             <!-- Lançamentos aqui -->
                         </div>
                     </div>
+
+                    <!-- PAINEL DE METAS -->
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4 border-b pb-3">Minhas Metas Financeiras</h2>
+                        <form id="meta-form" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                            <input type="text" id="meta-nome" placeholder="Nome da Meta" class="sm:col-span-2 border-gray-300 rounded-md shadow-sm" required>
+                            <input type="text" inputmode="decimal" id="meta-valor-total" placeholder="Valor Total (R$)" class="border-gray-300 rounded-md shadow-sm" required>
+                            <button type="submit" class="sm:col-span-3 w-full bg-brand-light text-brand-dark font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 transition-colors">Adicionar Meta</button>
+                        </form>
+                        <div id="meta-list" class="space-y-4 max-h-60 overflow-y-auto">
+                            <!-- Metas aqui -->
+                        </div>
+                    </div>
+
                      <div class="bg-white p-6 rounded-xl shadow-md">
                         <h2 class="text-xl font-bold mb-4 border-b pb-3">Análise Visual</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -308,6 +333,12 @@
             const servicoNomeInput = document.getElementById('servico-nome');
             const servicoValorInput = document.getElementById('servico-valor');
             const catalogList = document.getElementById('catalog-list');
+            
+            // Metas
+            const metaForm = document.getElementById('meta-form');
+            const metaNomeInput = document.getElementById('meta-nome');
+            const metaValorTotalInput = document.getElementById('meta-valor-total');
+            const metaList = document.getElementById('meta-list');
 
             // Agendamento
             const toggleToAgendaBtn = document.getElementById('toggleToAgenda');
@@ -336,6 +367,7 @@
             let transactions = JSON.parse(localStorage.getItem('fiozart_transactions')) || [];
             let catalogoServicos = JSON.parse(localStorage.getItem('fiozart_catalogo')) || [];
             let agendamentos = JSON.parse(localStorage.getItem('fiozart_agendamentos')) || [];
+            let metas = JSON.parse(localStorage.getItem('fiozart_metas')) || [];
             let transactionType = 'receita';
             let fluxoCaixaChart, despesasChart, calendar;
 
@@ -347,6 +379,7 @@
             const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(transactions));
             const saveCatalogo = () => localStorage.setItem('fiozart_catalogo', JSON.stringify(catalogoServicos));
             const saveAgendamentos = () => localStorage.setItem('fiozart_agendamentos', JSON.stringify(agendamentos));
+            const saveMetas = () => localStorage.setItem('fiozart_metas', JSON.stringify(metas));
 
             // --- LÓGICA DE CATÁLOGO ---
             const popularCatalogoNoForm = (selectElement) => {
@@ -436,6 +469,37 @@
                 updateUI();
             };
 
+            // --- LÓGICA DE METAS ---
+            const renderMetas = () => {
+                metaList.innerHTML = '';
+                 if (metas.length === 0) {
+                    metaList.innerHTML = '<p class="text-center text-gray-500 text-sm">Nenhuma meta cadastrada.</p>';
+                    return;
+                }
+                metas.forEach(meta => {
+                    const progresso = (meta.valorGuardado / meta.valorTotal) * 100;
+                    const div = document.createElement('div');
+                    div.className = 'border p-3 rounded-lg';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start">
+                           <div>
+                                <p class="font-bold">${meta.nome}</p>
+                                <p class="text-sm text-gray-600">${formatCurrency(meta.valorGuardado)} / ${formatCurrency(meta.valorTotal)}</p>
+                           </div>
+                            <span class="text-sm font-semibold">${progresso.toFixed(1)}%</span>
+                        </div>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-bar-inner" style="width: ${progresso}%;"></div>
+                        </div>
+                        <div class="text-right mt-2">
+                             <button data-id="${meta.id}" class="add-valor-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md hover:bg-green-200">Adicionar Valor</button>
+                             <button data-id="${meta.id}" class="delete-meta-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded-md hover:bg-red-200">Excluir</button>
+                        </div>
+                    `;
+                    metaList.appendChild(div);
+                });
+            };
+
             // --- LÓGICA DE AGENDAMENTO ---
             const renderCalendario = () => {
                 const eventos = agendamentos.map(ag => {
@@ -467,7 +531,6 @@
                             center: 'title',
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
                         },
-                        
                         buttonText: {
                             today:    'Hoje',
                             month:    'Mês',
@@ -641,6 +704,7 @@
                 popularCatalogoNoForm(servicoSelect);
                 popularCatalogoNoForm(agendamentoServicoSelect);
                 renderCatalogoList();
+                renderMetas();
                 renderCharts(transactionsDoMes);
             };
 
@@ -796,6 +860,46 @@
                     }
                 });
 
+                // Listeners de Metas
+                metaForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const nome = metaNomeInput.value.trim();
+                    const valorTotal = parseValue(metaValorTotalInput.value);
+
+                    if (!nome || !valorTotal) return;
+
+                    metas.push({
+                        id: Date.now(),
+                        nome,
+                        valorTotal,
+                        valorGuardado: 0,
+                    });
+
+                    saveMetas();
+                    renderMetas();
+                    metaForm.reset();
+                });
+
+                metaList.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    if (e.target.matches('.delete-meta-btn')) {
+                        if(confirm('Tem certeza que deseja excluir esta meta?')) {
+                            metas = metas.filter(m => m.id !== id);
+                            saveMetas();
+                            renderMetas();
+                        }
+                    } else if (e.target.matches('.add-valor-btn')) {
+                        const valorAdicionalStr = prompt('Quanto você deseja adicionar a esta meta?');
+                        const valorAdicional = parseValue(valorAdicionalStr);
+                        if(valorAdicional > 0) {
+                            const index = metas.findIndex(m => m.id === id);
+                            metas[index].valorGuardado += valorAdicional;
+                            saveMetas();
+                            renderMetas();
+                        }
+                    }
+                });
+
                 // Listeners da Agenda
                 toggleToAgendaBtn.addEventListener('click', () => {
                     financeiroView.classList.add('hidden');
@@ -826,3 +930,4 @@
     </script>
 </body>
 </html>
+
