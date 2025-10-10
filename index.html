@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" type="imagex/png" href="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0">
     <!-- CDN do FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script>
@@ -35,7 +34,7 @@
         }
         /* Estilo para a marca d'água */
         body::after {
-            content: ""
+            content: "";
             background-image: url('https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0');
             background-repeat: no-repeat;
             background-position: center;
@@ -198,8 +197,9 @@
             </section>
         </div>
         <footer class="text-center mt-8 text-gray-400 text-sm">
-            <p>Desenvolvido para Fiozart por FioSystem</p>
+            <p>Desenvolvido para Fiozart pelo Momo</p>
         </footer>
+
     </main>
 
     <!-- Modal de Gerenciamento do Catálogo -->
@@ -466,6 +466,14 @@
                             left: 'prev,next today',
                             center: 'title',
                             right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        },
+                        
+                        buttonText: {
+                            today:    'Hoje',
+                            month:    'Mês',
+                            week:     'Semana',
+                            day:      'Dia',
+                            list:     'Lista'
                         },
                         events: eventos,
                         dateClick: (info) => {
@@ -818,5 +826,3 @@
     </script>
 </body>
 </html>
-
-
