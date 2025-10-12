@@ -8,8 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-     <link rel="shortcut icon" type="imagex/png"
-        href="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- CDN do FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script>
@@ -92,13 +91,20 @@
             <h1 class="text-2xl font-bold text-brand-dark">Gestão Fiozart</h1>
             </div>
 
-            <div>
+            <div class="flex items-center gap-2">
                 <button id="toggleToAgenda" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Ver Agenda
                 </button>
                  <button id="toggleToFinanceiro" class="hidden bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Ver Financeiro
                 </button>
+                <button id="backupBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-all">
+                    Backup
+                </button>
+                <button id="restoreBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-all">
+                    Restaurar
+                </button>
+                <input type="file" id="restoreFile" class="hidden" accept=".json">
             </div>
         </div>
     </header>
@@ -363,6 +369,11 @@
             const agendamentoStatusSelect = document.getElementById('agendamento-status');
             const deleteAgendamentoBtn = document.getElementById('deleteAgendamentoBtn');
             const lancarReceitaBtn = document.getElementById('lancarReceitaBtn');
+
+            // Backup e Restore
+            const backupBtn = document.getElementById('backupBtn');
+            const restoreBtn = document.getElementById('restoreBtn');
+            const restoreFileInput = document.getElementById('restoreFile');
 
 
             // --- ESTADO DA APLICAÇÃO ---
@@ -809,6 +820,59 @@
                     }
                 });
             };
+
+            // --- LÓGICA DE BACKUP/RESTORE ---
+            const handleBackup = () => {
+                const allData = {
+                    transactions: transactions,
+                    catalogoServicos: catalogoServicos,
+                    agendamentos: agendamentos,
+                    metas: metas,
+                };
+
+                const dataStr = JSON.stringify(allData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                const date = new Date().toISOString().slice(0, 10);
+                link.href = url;
+                link.download = `backup_fiozart_${date}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+            
+            const handleRestore = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        
+                        if (importedData && 'transactions' in importedData && 'catalogoServicos' in importedData && 'agendamentos' in importedData && 'metas' in importedData) {
+                           if(confirm('Tem certeza que deseja restaurar os dados? Todos os dados atuais serão substituídos por este backup. Esta ação não pode ser desfeita.')) {
+                                localStorage.setItem('fiozart_transactions', JSON.stringify(importedData.transactions || []));
+                                localStorage.setItem('fiozart_catalogo', JSON.stringify(importedData.catalogoServicos || []));
+                                localStorage.setItem('fiozart_agendamentos', JSON.stringify(importedData.agendamentos || []));
+                                localStorage.setItem('fiozart_metas', JSON.stringify(importedData.metas || []));
+                                alert('Backup restaurado com sucesso! A página será recarregada.');
+                                location.reload();
+                           }
+                        } else {
+                            throw new Error('Formato de arquivo inválido.');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao restaurar o arquivo:', error);
+                        alert('Erro ao restaurar o backup. O arquivo pode estar corrompido ou em um formato inválido.');
+                    } finally {
+                        restoreFileInput.value = '';
+                    }
+                };
+                reader.readAsText(file);
+            };
             
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
             const init = () => {
@@ -908,20 +972,25 @@
                     agendaView.classList.remove('hidden');
                     toggleToAgendaBtn.classList.add('hidden');
                     toggleToFinanceiroBtn.classList.remove('hidden');
-                    renderCalendario(); // Renderiza ou re-renderiza o calendário ao mudar para a visão
+                    renderCalendario();
                 });
                 toggleToFinanceiroBtn.addEventListener('click', () => {
                     agendaView.classList.add('hidden');
                     financeiroView.classList.remove('hidden');
                     toggleToFinanceiroBtn.classList.add('hidden');
                     toggleToAgendaBtn.classList.remove('hidden');
-                    updateUI(); // Atualiza os dados financeiros ao voltar
+                    updateUI();
                 });
                 closeAgendamentoBtn.addEventListener('click', () => agendamentoModal.classList.add('hidden'));
                 agendamentoForm.addEventListener('submit', handleSaveAgendamento);
                 deleteAgendamentoBtn.addEventListener('click', handleDeleteAgendamento);
                 lancarReceitaBtn.addEventListener('click', handleLancarReceita);
                 agendamentoServicoSelect.addEventListener('change', handleAgendamentoServicoChange);
+
+                // Listeners de Backup/Restore
+                backupBtn.addEventListener('click', handleBackup);
+                restoreBtn.addEventListener('click', () => restoreFileInput.click());
+                restoreFileInput.addEventListener('change', handleRestore);
 
                 setTransactionType('receita');
                 updateUI();
@@ -932,5 +1001,4 @@
     </script>
 </body>
 </html>
-
 
