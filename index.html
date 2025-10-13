@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" type="imagex/png" href="'https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0">
     <!-- CDN do FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script>
@@ -109,29 +108,29 @@
 
     <!-- Cabeçalho -->
     <header class="bg-brand-bg-light/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm p-4 print:hidden">
-        <div class="container mx-auto flex justify-between items-center">
+        <div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-4">
-            <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-10 w-auto" id="logo-img">
-            <h1 class="text-2xl font-bold text-brand-dark">Gestão Fiozart</h1>
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-10 w-auto" id="logo-img">
+                <h1 class="text-xl md:text-2xl font-bold text-brand-dark">Gestão Fiozart</h1>
             </div>
 
-            <div class="flex items-center gap-2">
-                 <button id="toggleToFinanceiro" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+            <div class="flex items-center gap-2 flex-wrap">
+                 <button id="toggleToFinanceiro" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Financeiro
                 </button>
-                <button id="toggleToAgenda" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                <button id="toggleToAgenda" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Agenda
                 </button>
-                <button id="toggleToClientes" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                <button id="toggleToClientes" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Clientes
                 </button>
-                 <button id="toggleToRelatorios" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                 <button id="toggleToRelatorios" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Relatórios
                 </button>
-                <button id="backupBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-all">
+                <button id="backupBtn" class="text-sm md:text-base bg-gray-200 text-gray-700 font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-gray-300 transition-all">
                     Backup
                 </button>
-                <button id="restoreBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-all">
+                <button id="restoreBtn" class="text-sm md:text-base bg-gray-200 text-gray-700 font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-gray-300 transition-all">
                     Restaurar
                 </button>
                 <input type="file" id="restoreFile" class="hidden" accept=".json">
@@ -280,13 +279,13 @@
                             <p>Selecione um cliente na lista para ver seus detalhes e histórico de agendamentos.</p>
                         </div>
                         <div id="client-details-view" class="hidden">
-                             <div class="flex justify-between items-start mb-4 border-b pb-3">
+                             <div class="flex flex-col sm:flex-row justify-between items-start mb-4 border-b pb-3 gap-4">
                                  <div>
                                      <h2 id="client-detail-name" class="text-2xl font-bold text-brand-dark">Nome do Cliente</h2>
                                      <p id="client-detail-contact" class="text-gray-600">Contato</p>
                                      <p id="client-detail-instagram" class="text-gray-600 text-sm">Instagram</p>
                                  </div>
-                                 <button id="editClienteBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">Editar</button>
+                                 <button id="editClienteBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 w-full sm:w-auto">Editar</button>
                              </div>
                              <div>
                                  <h3 class="font-semibold text-lg mb-2">Anotações</h3>
@@ -318,10 +317,10 @@
                         <input type="date" id="report-end-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                     </div>
                     <div class="self-end">
-                        <button id="generateReportBtn" class="bg-brand-primary text-white font-bold py-2 px-5 rounded-lg hover:bg-brand-dark">Gerar Relatório</button>
+                        <button id="generateReportBtn" class="w-full sm:w-auto bg-brand-primary text-white font-bold py-2 px-5 rounded-lg hover:bg-brand-dark">Gerar Relatório</button>
                     </div>
                     <div class="self-end">
-                         <button id="printReportBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-300">Imprimir Relatório</button>
+                         <button id="printReportBtn" class="w-full sm:w-auto bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-300">Imprimir</button>
                     </div>
                 </div>
             </section>
