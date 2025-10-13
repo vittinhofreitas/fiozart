@@ -78,13 +78,37 @@
             height: 100%;
             transition: width 0.3s ease-in-out;
         }
+        .client-list-item.active {
+            background-color: #8d5b4c;
+            color: white;
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #report-content, #report-content * {
+                visibility: visible;
+            }
+            #report-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-brand-bg text-brand-dark">
 
     <!-- Cabeçalho -->
-    <header class="bg-brand-bg-light/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm p-4">
+    <header class="bg-brand-bg-light/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm p-4 print:hidden">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
             <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-10 w-auto" id="logo-img">
@@ -92,11 +116,17 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button id="toggleToAgenda" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
-                    Ver Agenda
+                 <button id="toggleToFinanceiro" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Financeiro
                 </button>
-                 <button id="toggleToFinanceiro" class="hidden bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
-                    Ver Financeiro
+                <button id="toggleToAgenda" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Agenda
+                </button>
+                <button id="toggleToClientes" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Clientes
+                </button>
+                 <button id="toggleToRelatorios" class="bg-brand-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Relatórios
                 </button>
                 <button id="backupBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-all">
                     Backup
@@ -229,7 +259,125 @@
                 <div id='calendario'></div>
             </section>
         </div>
-        <footer class="text-center mt-8 text-gray-400 text-sm">
+        
+        <!-- VISÃO DE CLIENTES (OCULTA) -->
+        <div id="clientesView" class="hidden">
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Coluna da Lista de Clientes -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md">
+                    <div class="flex justify-between items-center mb-4 border-b pb-3">
+                         <h2 class="text-xl font-bold">Seus Clientes</h2>
+                         <button id="addClienteBtn" class="bg-brand-primary text-white font-bold py-2 px-3 rounded-lg hover:bg-brand-dark text-sm">Novo +</button>
+                    </div>
+                    <div id="client-list" class="space-y-2 max-h-[600px] overflow-y-auto">
+                        <!-- Lista de clientes será populada aqui -->
+                    </div>
+                </div>
+                <!-- Coluna de Detalhes do Cliente -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                     <div id="client-details-content">
+                         <div id="client-details-placeholder" class="text-center text-gray-500 pt-10">
+                            <p>Selecione um cliente na lista para ver seus detalhes e histórico de agendamentos.</p>
+                        </div>
+                        <div id="client-details-view" class="hidden">
+                             <div class="flex justify-between items-start mb-4 border-b pb-3">
+                                 <div>
+                                     <h2 id="client-detail-name" class="text-2xl font-bold text-brand-dark">Nome do Cliente</h2>
+                                     <p id="client-detail-contact" class="text-gray-600">Contato</p>
+                                     <p id="client-detail-instagram" class="text-gray-600 text-sm">Instagram</p>
+                                 </div>
+                                 <button id="editClienteBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300">Editar</button>
+                             </div>
+                             <div>
+                                 <h3 class="font-semibold text-lg mb-2">Anotações</h3>
+                                 <p id="client-detail-notes" class="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm whitespace-pre-wrap min-h-[50px]">Nenhuma anotação.</p>
+                             </div>
+                             <div class="mt-6">
+                                <h3 class="font-semibold text-lg mb-2">Histórico de Agendamentos</h3>
+                                <div id="client-detail-history" class="space-y-3 max-h-80 overflow-y-auto">
+                                    <!-- Histórico será populado aqui -->
+                                </div>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- VISÃO DE RELATÓRIOS (OCULTA) -->
+        <div id="relatoriosView" class="hidden">
+            <!-- Filtros -->
+            <section class="bg-white p-4 rounded-xl shadow-md mb-6 print:hidden">
+                <div class="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label for="report-start-date" class="block text-sm font-medium">Data de Início</label>
+                        <input type="date" id="report-start-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="report-end-date" class="block text-sm font-medium">Data de Fim</label>
+                        <input type="date" id="report-end-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="self-end">
+                        <button id="generateReportBtn" class="bg-brand-primary text-white font-bold py-2 px-5 rounded-lg hover:bg-brand-dark">Gerar Relatório</button>
+                    </div>
+                    <div class="self-end">
+                         <button id="printReportBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-5 rounded-lg hover:bg-gray-300">Imprimir Relatório</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conteúdo do Relatório -->
+            <div id="report-content" class="space-y-6">
+                <h1 class="text-3xl font-bold text-brand-dark text-center mb-4">Relatório de Desempenho</h1>
+                <p id="report-period" class="text-center text-gray-500 -mt-4 mb-6">Período: --/--/---- a --/--/----</p>
+                
+                <!-- KPIs do Relatório -->
+                <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Total Faturado</h3>
+                        <p id="report-total-receita" class="text-3xl font-bold text-green-600 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Total Despesas</h3>
+                        <p id="report-total-despesa" class="text-3xl font-bold text-red-600 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Lucro Total</h3>
+                        <p id="report-total-lucro" class="text-3xl font-bold text-brand-dark mt-2">R$ 0,00</p>
+                    </div>
+                </section>
+                
+                <!-- Gráfico Anual -->
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Faturamento Mensal</h2>
+                    <canvas id="reportFaturamentoChart"></canvas>
+                </section>
+                
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Ranking de Serviços -->
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">Ranking de Serviços</h2>
+                        <div id="report-servicos-list" class="space-y-3"></div>
+                    </div>
+                    <!-- Ranking de Clientes -->
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4">Ranking de Clientes</h2>
+                        <div id="report-clientes-list" class="space-y-3"></div>
+                    </div>
+                </section>
+
+                 <!-- Análise de Despesas -->
+                <section class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Análise de Despesas por Categoria</h2>
+                    <div class="max-w-md mx-auto">
+                        <canvas id="reportDespesasChart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+
+        <footer class="text-center mt-8 text-gray-400 text-sm print:hidden">
             <p>Desenvolvido para Fiozart pelo Momo</p>
         </footer>
 
@@ -277,12 +425,8 @@
                     </div>
                 </div>
                 <div>
-                    <label for="agendamento-cliente-nome" class="block text-sm font-medium">Nome do Cliente</label>
-                    <input type="text" id="agendamento-cliente-nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                </div>
-                <div>
-                    <label for="agendamento-cliente-contato" class="block text-sm font-medium">Contato (Telefone/WhatsApp)</label>
-                    <input type="text" id="agendamento-cliente-contato" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <label for="agendamento-cliente-select" class="block text-sm font-medium">Cliente</label>
+                     <select id="agendamento-cliente-select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required></select>
                 </div>
                 <div>
                     <label for="agendamento-servico" class="block text-sm font-medium">Serviço Prestado</label>
@@ -303,10 +447,44 @@
                         </select>
                     </div>
                 </div>
-                <div id="modal-actions" class="flex flex-col sm:flex-row-reverse gap-3 pt-4">
+                <div id="modal-actions" class="flex flex-wrap-reverse gap-3 pt-4">
                     <button type="submit" id="saveAgendamentoBtn" class="w-full sm:w-auto bg-brand-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-brand-dark transition-colors">Salvar</button>
                     <button type="button" id="deleteAgendamentoBtn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors hidden">Excluir</button>
-                    <button type="button" id="lancarReceitaBtn" class="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors hidden">Lançar como Receita</button>
+                    <button type="button" id="lancarReceitaBtn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors hidden">Lançar como Receita</button>
+                    <button type="button" id="lembreteWppBtn" class="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors hidden">Lembrete via WhatsApp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar/Editar Cliente -->
+    <div id="clienteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h2 class="text-xl font-bold" id="clienteModalTitle">Adicionar Novo Cliente</h2>
+                <button id="closeClienteModalBtn" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="cliente-form" class="space-y-4">
+                <input type="hidden" id="clienteId">
+                <div>
+                    <label for="cliente-nome" class="block text-sm font-medium">Nome Completo</label>
+                    <input type="text" id="cliente-nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div>
+                    <label for="cliente-contato" class="block text-sm font-medium">Telefone / WhatsApp</label>
+                    <input type="text" id="cliente-contato" placeholder="5586999991234" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="cliente-instagram" class="block text-sm font-medium">Instagram (opcional)</label>
+                    <input type="text" id="cliente-instagram" placeholder="sem @" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="cliente-notas" class="block text-sm font-medium">Anotações Importantes</label>
+                    <textarea id="cliente-notas" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                </div>
+                <div class="flex flex-col sm:flex-row-reverse gap-3 pt-4">
+                    <button type="submit" class="w-full sm:w-auto bg-brand-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-brand-dark">Salvar Cliente</button>
+                    <button type="button" id="deleteClienteBtn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 hidden">Excluir Cliente</button>
                 </div>
             </form>
         </div>
@@ -348,11 +526,17 @@
             const metaValorTotalInput = document.getElementById('meta-valor-total');
             const metaList = document.getElementById('meta-list');
 
-            // Agendamento
-            const toggleToAgendaBtn = document.getElementById('toggleToAgenda');
+            // Navegação entre Views
             const toggleToFinanceiroBtn = document.getElementById('toggleToFinanceiro');
+            const toggleToAgendaBtn = document.getElementById('toggleToAgenda');
+            const toggleToClientesBtn = document.getElementById('toggleToClientes');
+            const toggleToRelatoriosBtn = document.getElementById('toggleToRelatorios');
             const financeiroView = document.getElementById('financeiroView');
             const agendaView = document.getElementById('agendaView');
+            const clientesView = document.getElementById('clientesView');
+            const relatoriosView = document.getElementById('relatoriosView');
+
+            // Agendamento
             const calendarioEl = document.getElementById('calendario');
             const agendamentoModal = document.getElementById('agendamentoModal');
             const closeAgendamentoBtn = document.getElementById('closeAgendamentoBtn');
@@ -362,13 +546,47 @@
             const agendamentoDataInput = document.getElementById('agendamento-data');
             const agendamentoHoraInicioInput = document.getElementById('agendamento-hora-inicio');
             const agendamentoHoraFimInput = document.getElementById('agendamento-hora-fim');
-            const agendamentoClienteNomeInput = document.getElementById('agendamento-cliente-nome');
-            const agendamentoClienteContatoInput = document.getElementById('agendamento-cliente-contato');
+            const agendamentoClienteSelect = document.getElementById('agendamento-cliente-select');
             const agendamentoServicoSelect = document.getElementById('agendamento-servico');
             const agendamentoValorInput = document.getElementById('agendamento-valor');
             const agendamentoStatusSelect = document.getElementById('agendamento-status');
             const deleteAgendamentoBtn = document.getElementById('deleteAgendamentoBtn');
             const lancarReceitaBtn = document.getElementById('lancarReceitaBtn');
+            const lembreteWppBtn = document.getElementById('lembreteWppBtn');
+
+            // Clientes (CRM)
+            const addClienteBtn = document.getElementById('addClienteBtn');
+            const clientListEl = document.getElementById('client-list');
+            const clientDetailsPlaceholder = document.getElementById('client-details-placeholder');
+            const clientDetailsView = document.getElementById('client-details-view');
+            const clientDetailName = document.getElementById('client-detail-name');
+            const clientDetailContact = document.getElementById('client-detail-contact');
+            const clientDetailInstagram = document.getElementById('client-detail-instagram');
+            const clientDetailNotes = document.getElementById('client-detail-notes');
+            const clientDetailHistory = document.getElementById('client-detail-history');
+            const editClienteBtn = document.getElementById('editClienteBtn');
+            const clienteModal = document.getElementById('clienteModal');
+            const closeClienteModalBtn = document.getElementById('closeClienteModalBtn');
+            const clienteModalTitle = document.getElementById('clienteModalTitle');
+            const clienteForm = document.getElementById('cliente-form');
+            const clienteIdInput = document.getElementById('clienteId');
+            const clienteNomeInput = document.getElementById('cliente-nome');
+            const clienteContatoInput = document.getElementById('cliente-contato');
+            const clienteInstagramInput = document.getElementById('cliente-instagram');
+            const clienteNotasInput = document.getElementById('cliente-notas');
+            const deleteClienteBtn = document.getElementById('deleteClienteBtn');
+
+            // Relatórios
+            const reportStartDateInput = document.getElementById('report-start-date');
+            const reportEndDateInput = document.getElementById('report-end-date');
+            const generateReportBtn = document.getElementById('generateReportBtn');
+            const printReportBtn = document.getElementById('printReportBtn');
+            const reportPeriodEl = document.getElementById('report-period');
+            const reportTotalReceitaEl = document.getElementById('report-total-receita');
+            const reportTotalDespesaEl = document.getElementById('report-total-despesa');
+            const reportTotalLucroEl = document.getElementById('report-total-lucro');
+            const reportServicosListEl = document.getElementById('report-servicos-list');
+            const reportClientesListEl = document.getElementById('report-clientes-list');
 
             // Backup e Restore
             const backupBtn = document.getElementById('backupBtn');
@@ -381,18 +599,42 @@
             let catalogoServicos = JSON.parse(localStorage.getItem('fiozart_catalogo')) || [];
             let agendamentos = JSON.parse(localStorage.getItem('fiozart_agendamentos')) || [];
             let metas = JSON.parse(localStorage.getItem('fiozart_metas')) || [];
+            let clientes = JSON.parse(localStorage.getItem('fiozart_clientes')) || [];
             let transactionType = 'receita';
-            let fluxoCaixaChart, despesasChart, calendar;
+            let selectedClientId = null;
+            let fluxoCaixaChart, despesasChart, calendar, reportFaturamentoChart, reportDespesasChart;
 
             // --- FUNÇÕES UTILITÁRIAS ---
             const formatCurrency = (value) => parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const parseValue = (value) => parseFloat(String(value).replace(',', '.')) || 0;
+            const formatDate = (dateString) => new Date(dateString + 'T00:00:00-03:00').toLocaleDateString('pt-BR');
 
             // --- FUNÇÕES DE ARMAZENAMENTO ---
             const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(transactions));
             const saveCatalogo = () => localStorage.setItem('fiozart_catalogo', JSON.stringify(catalogoServicos));
             const saveAgendamentos = () => localStorage.setItem('fiozart_agendamentos', JSON.stringify(agendamentos));
             const saveMetas = () => localStorage.setItem('fiozart_metas', JSON.stringify(metas));
+            const saveClientes = () => localStorage.setItem('fiozart_clientes', JSON.stringify(clientes));
+            
+            // --- LÓGICA DE NAVEGAÇÃO ---
+            const switchView = (viewToShow) => {
+                [financeiroView, agendaView, clientesView, relatoriosView].forEach(view => view.classList.add('hidden'));
+                viewToShow.classList.remove('hidden');
+
+                if(viewToShow === agendaView) renderCalendario();
+                if(viewToShow === clientesView) {
+                    renderClientList();
+                    renderClientDetails(selectedClientId);
+                }
+                if(viewToShow === financeiroView) updateUI();
+                if(viewToShow === relatoriosView) {
+                     const today = new Date();
+                     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+                     reportStartDateInput.value = firstDayOfMonth;
+                     reportEndDateInput.value = today.toISOString().split('T')[0];
+                     generateReport();
+                }
+            };
 
             // --- LÓGICA DE CATÁLOGO ---
             const popularCatalogoNoForm = (selectElement) => {
@@ -512,10 +754,111 @@
                     metaList.appendChild(div);
                 });
             };
+            
+            // --- LÓGICA DE CLIENTES (CRM) ---
+            const renderClientList = () => {
+                clientListEl.innerHTML = '';
+                 if (clientes.length === 0) {
+                    clientListEl.innerHTML = '<p class="text-center text-gray-500 text-sm">Nenhum cliente cadastrado.</p>';
+                    return;
+                }
+                clientes.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(cliente => {
+                    const div = document.createElement('div');
+                    div.className = 'client-list-item p-3 rounded-lg cursor-pointer hover:bg-brand-light/20';
+                    if(cliente.id === selectedClientId) div.classList.add('active');
+                    div.dataset.id = cliente.id;
+                    div.innerHTML = `
+                        <p class="font-semibold">${cliente.nome}</p>
+                        <p class="text-sm">${cliente.contato}</p>
+                    `;
+                    div.addEventListener('click', () => {
+                        selectedClientId = cliente.id;
+                        renderClientDetails(cliente.id);
+                        renderClientList(); // Re-render para atualizar a classe 'active'
+                    });
+                    clientListEl.appendChild(div);
+                });
+            };
+
+            const renderClientDetails = (clientId) => {
+                const cliente = clientes.find(c => c.id === clientId);
+                if(!cliente) {
+                    clientDetailsPlaceholder.classList.remove('hidden');
+                    clientDetailsView.classList.add('hidden');
+                    return;
+                }
+                
+                clientDetailsPlaceholder.classList.add('hidden');
+                clientDetailsView.classList.remove('hidden');
+
+                clientDetailName.textContent = cliente.nome;
+                clientDetailContact.textContent = cliente.contato || 'Nenhum contato salvo';
+                clientDetailInstagram.textContent = cliente.instagram ? `@${cliente.instagram}` : 'Nenhum Instagram salvo';
+                clientDetailNotes.textContent = cliente.notas || 'Nenhuma anotação.';
+                editClienteBtn.dataset.id = cliente.id;
+
+                // Histórico
+                const historico = agendamentos.filter(ag => ag.clienteId === clientId).sort((a,b) => new Date(b.data) - new Date(a.data));
+                clientDetailHistory.innerHTML = '';
+                if(historico.length === 0) {
+                    clientDetailHistory.innerHTML = '<p class="text-sm text-gray-500">Nenhum agendamento encontrado para este cliente.</p>';
+                    return;
+                }
+                historico.forEach(ag => {
+                     const div = document.createElement('div');
+                     div.className = 'p-3 border-l-4 rounded-r-lg';
+                     let borderColor = 'border-gray-400';
+                     if (ag.status === 'Realizado') borderColor = 'border-green-500';
+                     if (ag.status === 'Cancelado') borderColor = 'border-red-500';
+                     if (ag.status === 'Confirmado') borderColor = 'border-blue-500';
+                     div.classList.add(borderColor);
+
+                     div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <p class="font-semibold">${ag.servicoNome}</p>
+                            <p class="text-sm font-bold">${ag.status}</p>
+                        </div>
+                        <p class="text-sm text-gray-600">${formatDate(ag.data)} às ${ag.horaInicio}</p>
+                        <p class="text-sm text-gray-600">${formatCurrency(ag.valorCobrado)}</p>
+                     `;
+                     clientDetailHistory.appendChild(div);
+                });
+            };
+
+            const openClienteModal = (clienteId = null) => {
+                clienteForm.reset();
+                deleteClienteBtn.classList.add('hidden');
+                if(clienteId) {
+                    const cliente = clientes.find(c => c.id === clienteId);
+                    clienteModalTitle.textContent = "Editar Cliente";
+                    clienteIdInput.value = cliente.id;
+                    clienteNomeInput.value = cliente.nome;
+                    clienteContatoInput.value = cliente.contato;
+                    clienteInstagramInput.value = cliente.instagram;
+                    clienteNotasInput.value = cliente.notas;
+                    deleteClienteBtn.classList.remove('hidden');
+                } else {
+                    clienteModalTitle.textContent = "Adicionar Novo Cliente";
+                    clienteIdInput.value = '';
+                }
+                clienteModal.classList.remove('hidden');
+            };
+
+            const popularClientesNoAgendamento = () => {
+                agendamentoClienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
+                 clientes.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = cliente.nome;
+                    agendamentoClienteSelect.appendChild(option);
+                });
+            };
 
             // --- LÓGICA DE AGENDAMENTO ---
             const renderCalendario = () => {
                 const eventos = agendamentos.map(ag => {
+                    const cliente = clientes.find(c => c.id === ag.clienteId);
+                    const clienteNome = cliente ? cliente.nome : "Cliente Apagado";
                     let color = '#8d5b4c'; // Padrão 'Agendado'
                     if (ag.status === 'Confirmado') color = '#2563eb'; // Azul
                     if (ag.status === 'Realizado') color = '#16a34a'; // Verde
@@ -523,7 +866,7 @@
 
                     return {
                         id: ag.id,
-                        title: `${ag.clienteNome} - ${ag.servicoNome}`,
+                        title: `${clienteNome} - ${ag.servicoNome}`,
                         start: `${ag.data}T${ag.horaInicio}`,
                         end: `${ag.data}T${ag.horaFim}`,
                         backgroundColor: color,
@@ -557,8 +900,10 @@
                             agendamentoModalTitle.textContent = "Novo Agendamento";
                             agendamentoIdInput.value = '';
                             agendamentoDataInput.value = info.dateStr;
+                            popularClientesNoAgendamento();
                             deleteAgendamentoBtn.classList.add('hidden');
                             lancarReceitaBtn.classList.add('hidden');
+                            lembreteWppBtn.classList.add('hidden');
                             agendamentoModal.classList.remove('hidden');
                         },
                         eventClick: (info) => {
@@ -569,13 +914,14 @@
                             agendamentoDataInput.value = ag.data;
                             agendamentoHoraInicioInput.value = ag.horaInicio;
                             agendamentoHoraFimInput.value = ag.horaFim;
-                            agendamentoClienteNomeInput.value = ag.clienteNome;
-                            agendamentoClienteContatoInput.value = ag.clienteContato;
+                            popularClientesNoAgendamento();
+                            agendamentoClienteSelect.value = ag.clienteId;
                             agendamentoServicoSelect.value = ag.servicoNome;
                             agendamentoValorInput.value = ag.valorCobrado;
                             agendamentoStatusSelect.value = ag.status;
                             
                             deleteAgendamentoBtn.classList.remove('hidden');
+                            lembreteWppBtn.classList.remove('hidden');
                             
                             if(ag.status === 'Realizado' && !ag.receitaLancada) {
                                 lancarReceitaBtn.classList.remove('hidden');
@@ -605,14 +951,13 @@
                     data: agendamentoDataInput.value,
                     horaInicio: agendamentoHoraInicioInput.value,
                     horaFim: agendamentoHoraFimInput.value,
-                    clienteNome: agendamentoClienteNomeInput.value.trim(),
-                    clienteContato: agendamentoClienteContatoInput.value.trim(),
+                    clienteId: parseInt(agendamentoClienteSelect.value),
                     servicoNome: agendamentoServicoSelect.value,
                     valorCobrado: parseValue(agendamentoValorInput.value),
                     status: agendamentoStatusSelect.value,
                 };
                 
-                if (!agendamento.data || !agendamento.horaInicio || !agendamento.horaFim || !agendamento.clienteNome || !agendamento.servicoNome || !agendamento.valorCobrado) {
+                if (!agendamento.data || !agendamento.horaInicio || !agendamento.horaFim || !agendamento.clienteId || !agendamento.servicoNome || !agendamento.valorCobrado) {
                      alert('Por favor, preencha os campos obrigatórios.');
                      return;
                 }
@@ -644,17 +989,19 @@
                 const ag = agendamentos.find(a => a.id === id);
                 if (!ag) return;
 
+                const cliente = clientes.find(c => c.id === ag.clienteId);
+                const clienteNome = cliente ? cliente.nome : 'Cliente';
+
                 transactions.push({
                     id: Date.now(),
                     type: 'receita',
-                    description: `Serviço: ${ag.servicoNome} (Cliente: ${ag.clienteNome})`,
+                    description: `Serviço: ${ag.servicoNome} (Cliente: ${clienteNome})`,
                     amount: ag.valorCobrado,
                     date: ag.data,
                     category: 'Agendamento',
-                    agendamentoId: ag.id // Link para o agendamento
+                    agendamentoId: ag.id
                 });
                 
-                // Marcar que a receita foi lançada para evitar duplicidade
                 ag.receitaLancada = true;
                 const index = agendamentos.findIndex(a => a.id === id);
                 agendamentos[index] = ag;
@@ -668,10 +1015,29 @@
                 alert('Receita lançada com sucesso no financeiro!');
             };
 
+            const handleLembreteWhatsApp = () => {
+                const agendamentoId = parseInt(agendamentoIdInput.value);
+                const agendamento = agendamentos.find(ag => ag.id === agendamentoId);
+                if (!agendamento) return alert('Agendamento não encontrado.');
 
-            // --- ATUALIZAÇÃO DA UI ---
+                const clienteId = agendamento.clienteId;
+                const cliente = clientes.find(c => c.id === clienteId);
+                if (!cliente || !cliente.contato) return alert('O cliente não tem um número de contato salvo. Adicione o número na aba "Clientes".');
+
+                const numero = cliente.contato.replace(/\D/g, ''); // Remove caracteres não numéricos
+                const nomeCliente = cliente.nome.split(' ')[0]; // Pega só o primeiro nome
+                const dataAgendamento = formatDate(agendamento.data);
+                const horaAgendamento = agendamento.horaInicio;
+
+                const texto = `Olá, ${nomeCliente}! Passando para confirmar seu horário na Fiozart amanhã, dia ${dataAgendamento} às ${horaAgendamento}. Podemos confirmar?`;
+                const linkWhatsApp = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+
+                window.open(linkWhatsApp, '_blank');
+            };
+
+
+            // --- ATUALIZAÇÃO DA UI GERAL ---
             const updateUI = () => {
-                // Filtra transações pelo mês atual (exemplo)
                 const hoje = new Date();
                 const mesAtual = hoje.getMonth();
                 const anoAtual = hoje.getFullYear();
@@ -693,7 +1059,7 @@
                         div.innerHTML = `
                             <div>
                                 <p class="font-semibold">${t.description}</p>
-                                <p class="text-sm text-gray-500">${new Date(t.date + 'T00:00:00-03:00').toLocaleDateString('pt-BR')}</p>
+                                <p class="text-sm text-gray-500">${formatDate(t.date)}</p>
                             </div>
                             <div class="flex items-center">
                                 <span class="font-bold text-lg ${amountClass}">${sign} ${formatCurrency(t.amount)}</span>
@@ -728,7 +1094,7 @@
                     btnDespesa.className = 'w-full bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg';
                     servicoContainer.style.display = 'block';
                     categoriaDespesaContainer.classList.add('hidden');
-                    handleServicoChange(); // Chama para ajustar a visibilidade da descrição
+                    handleServicoChange(); 
                 } else {
                     btnDespesa.className = 'w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg';
                     btnReceita.className = 'w-full bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg';
@@ -747,7 +1113,7 @@
                     descricaoContainer.classList.add('hidden');
                     const selectedOption = servicoSelect.options[servicoSelect.selectedIndex];
                     valorInput.value = selectedOption.dataset.valor || '';
-                    valorInput.readOnly = false; // Permite edição
+                    valorInput.readOnly = false; 
                 } else {
                     descricaoContainer.classList.add('hidden');
                     valorInput.value = '';
@@ -767,7 +1133,6 @@
 
             // --- LÓGICA DE GRÁFICOS ---
             const renderCharts = (data) => {
-                // Gráfico de Fluxo de Caixa
                 const labels = [...new Set(data.map(t => t.date))].sort();
                 const receitaData = labels.map(label => 
                     data.filter(t => t.date === label && t.type === 'receita').reduce((sum, t) => sum + t.amount, 0)
@@ -781,27 +1146,17 @@
                     type: 'line',
                     data: {
                         labels,
-                        datasets: [{
-                            label: 'Receitas',
-                            data: receitaData,
-                            borderColor: 'rgb(22, 163, 74)',
-                            tension: 0.1
-                        }, {
-                            label: 'Despesas',
-                            data: despesaData,
-                            borderColor: 'rgb(220, 38, 38)',
-                            tension: 0.1
-                        }]
+                        datasets: [{ label: 'Receitas', data: receitaData, borderColor: 'rgb(22, 163, 74)', tension: 0.1 }, 
+                                   { label: 'Despesas', data: despesaData, borderColor: 'rgb(220, 38, 38)', tension: 0.1 }]
                     }
                 });
 
-                // Gráfico de Despesas por Categoria
                 const despesas = data.filter(t => t.type === 'despesa');
                 const categorias = [...new Set(despesas.map(d => d.category))];
                 const despesasPorCategoria = categorias.map(cat => 
                     despesas.filter(d => d.category === cat).reduce((sum, d) => sum + Math.abs(d.amount), 0)
                 );
-                if (despesasPorCategoria.length === 0) { // Adiciona dado placeholder se não houver despesas
+                if (despesasPorCategoria.length === 0) {
                     categorias.push("Nenhuma Despesa");
                     despesasPorCategoria.push(1);
                 }
@@ -812,7 +1167,6 @@
                     data: {
                         labels: categorias,
                         datasets: [{
-                            label: 'Despesas por Categoria',
                             data: despesasPorCategoria,
                             backgroundColor: ['#8d5b4c', '#d4a373', '#4a2c2a', '#a1a1aa', '#71717a', '#fdf8f0'],
                             hoverOffset: 4
@@ -821,13 +1175,130 @@
                 });
             };
 
+            // --- LÓGICA DE RELATÓRIOS ---
+            const generateReport = () => {
+                const startDate = new Date(reportStartDateInput.value + 'T00:00:00-03:00');
+                const endDate = new Date(reportEndDateInput.value + 'T23:59:59-03:00');
+
+                if(!reportStartDateInput.value || !reportEndDateInput.value) {
+                    alert('Por favor, selecione as datas de início e fim.');
+                    return;
+                }
+                
+                reportPeriodEl.textContent = `Período: ${formatDate(reportStartDateInput.value)} a ${formatDate(reportEndDateInput.value)}`;
+
+                const filteredTransactions = transactions.filter(t => {
+                    const tDate = new Date(t.date);
+                    return tDate >= startDate && tDate <= endDate;
+                });
+                const filteredAgendamentos = agendamentos.filter(ag => {
+                     const agDate = new Date(ag.data);
+                    return agDate >= startDate && agDate <= endDate && ag.status === 'Realizado';
+                });
+
+                // 1. KPIs
+                const totalReceita = filteredTransactions.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.amount, 0);
+                const totalDespesa = Math.abs(filteredTransactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.amount, 0));
+                reportTotalReceitaEl.textContent = formatCurrency(totalReceita);
+                reportTotalDespesaEl.textContent = formatCurrency(totalDespesa);
+                reportTotalLucroEl.textContent = formatCurrency(totalReceita - totalDespesa);
+
+                // 2. Gráfico Faturamento Mensal
+                const monthlyData = {};
+                filteredTransactions.forEach(t => {
+                    const month = t.date.substring(0, 7); // YYYY-MM
+                    if(!monthlyData[month]) monthlyData[month] = {receita: 0, despesa: 0};
+                    if(t.type === 'receita') monthlyData[month].receita += t.amount;
+                    else monthlyData[month].despesa += Math.abs(t.amount);
+                });
+
+                const sortedMonths = Object.keys(monthlyData).sort();
+                const faturamentoLabels = sortedMonths.map(m => new Date(m + '-02').toLocaleDateString('pt-BR', {month:'short', year:'2-digit'}));
+                const faturamentoReceitas = sortedMonths.map(m => monthlyData[m].receita);
+                const faturamentoDespesas = sortedMonths.map(m => monthlyData[m].despesa);
+                
+                if(reportFaturamentoChart) reportFaturamentoChart.destroy();
+                reportFaturamentoChart = new Chart(document.getElementById('reportFaturamentoChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: faturamentoLabels,
+                        datasets: [
+                            {label: 'Receita', data: faturamentoReceitas, backgroundColor: 'rgb(34, 197, 94)'},
+                            {label: 'Despesa', data: faturamentoDespesas, backgroundColor: 'rgb(239, 68, 68)'}
+                        ]
+                    }
+                });
+
+                // 3. Ranking de Serviços
+                const servicosRank = filteredAgendamentos.reduce((acc, ag) => {
+                    if(!acc[ag.servicoNome]) acc[ag.servicoNome] = { count: 0, total: 0 };
+                    acc[ag.servicoNome].count++;
+                    acc[ag.servicoNome].total += ag.valorCobrado;
+                    return acc;
+                }, {});
+
+                const sortedServicos = Object.entries(servicosRank).sort((a,b) => b[1].total - a[1].total);
+                reportServicosListEl.innerHTML = sortedServicos.map(([nome, data]) => `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <p>${nome}</p>
+                        <div class="text-right">
+                           <p class="font-bold">${formatCurrency(data.total)}</p>
+                           <p class="text-sm text-gray-500">${data.count} vez(es)</p>
+                        </div>
+                    </div>
+                `).join('');
+
+
+                // 4. Ranking de Clientes
+                const clientesRank = filteredAgendamentos.reduce((acc, ag) => {
+                    if(!acc[ag.clienteId]) acc[ag.clienteId] = { count: 0, total: 0 };
+                    acc[ag.clienteId].count++;
+                    acc[ag.clienteId].total += ag.valorCobrado;
+                    return acc;
+                }, {});
+
+                const sortedClientes = Object.entries(clientesRank).sort((a,b) => b[1].total - a[1].total);
+                reportClientesListEl.innerHTML = sortedClientes.map(([clienteId, data]) => {
+                    const cliente = clientes.find(c => c.id === parseInt(clienteId));
+                    return `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <p>${cliente ? cliente.nome : 'Cliente Apagado'}</p>
+                        <div class="text-right">
+                           <p class="font-bold">${formatCurrency(data.total)}</p>
+                           <p class="text-sm text-gray-500">${data.count} agendamento(s)</p>
+                        </div>
+                    </div>
+                `}).join('');
+
+                // 5. Gráfico Despesas
+                const reportDespesas = filteredTransactions.filter(t => t.type === 'despesa');
+                const reportCategorias = [...new Set(reportDespesas.map(d => d.category))];
+                const reportDespesasPorCategoria = reportCategorias.map(cat => 
+                    reportDespesas.filter(d => d.category === cat).reduce((sum, d) => sum + Math.abs(d.amount), 0)
+                );
+                 if (reportDespesasPorCategoria.length === 0) {
+                    reportCategorias.push("Nenhuma Despesa");
+                    reportDespesasPorCategoria.push(1);
+                }
+
+                if(reportDespesasChart) reportDespesasChart.destroy();
+                reportDespesasChart = new Chart(document.getElementById('reportDespesasChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: reportCategorias,
+                        datasets: [{
+                            data: reportDespesasPorCategoria,
+                            backgroundColor: ['#8d5b4c', '#d4a373', '#4a2c2a', '#a1a1aa', '#71717a', '#fdf8f0'],
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom' } } }
+                });
+            };
+
             // --- LÓGICA DE BACKUP/RESTORE ---
             const handleBackup = () => {
                 const allData = {
-                    transactions: transactions,
-                    catalogoServicos: catalogoServicos,
-                    agendamentos: agendamentos,
-                    metas: metas,
+                    transactions, catalogoServicos, agendamentos, metas, clientes
                 };
 
                 const dataStr = JSON.stringify(allData, null, 2);
@@ -851,13 +1322,14 @@
                 reader.onload = (e) => {
                     try {
                         const importedData = JSON.parse(e.target.result);
+                        const requiredKeys = ['transactions', 'catalogoServicos', 'agendamentos', 'metas', 'clientes'];
+                        const hasAllKeys = requiredKeys.every(key => key in importedData);
                         
-                        if (importedData && 'transactions' in importedData && 'catalogoServicos' in importedData && 'agendamentos' in importedData && 'metas' in importedData) {
+                        if (hasAllKeys) {
                            if(confirm('Tem certeza que deseja restaurar os dados? Todos os dados atuais serão substituídos por este backup. Esta ação não pode ser desfeita.')) {
-                                localStorage.setItem('fiozart_transactions', JSON.stringify(importedData.transactions || []));
-                                localStorage.setItem('fiozart_catalogo', JSON.stringify(importedData.catalogoServicos || []));
-                                localStorage.setItem('fiozart_agendamentos', JSON.stringify(importedData.agendamentos || []));
-                                localStorage.setItem('fiozart_metas', JSON.stringify(importedData.metas || []));
+                                requiredKeys.forEach(key => {
+                                    localStorage.setItem(`fiozart_${key.toLowerCase()}`, JSON.stringify(importedData[key] || []));
+                                });
                                 alert('Backup restaurado com sucesso! A página será recarregada.');
                                 location.reload();
                            }
@@ -876,8 +1348,13 @@
             
             // --- INICIALIZAÇÃO E EVENT LISTENERS ---
             const init = () => {
-                // Expor função globalmente
                 window.deleteTransaction = deleteTransaction;
+
+                // Listeners de Navegação
+                toggleToFinanceiroBtn.addEventListener('click', () => switchView(financeiroView));
+                toggleToAgendaBtn.addEventListener('click', () => switchView(agendaView));
+                toggleToClientesBtn.addEventListener('click', () => switchView(clientesView));
+                toggleToRelatoriosBtn.addEventListener('click', () => switchView(relatoriosView));
 
                 // Listeners financeiros
                 transactionForm.addEventListener('submit', addTransaction);
@@ -897,14 +1374,13 @@
 
                     if (!nome || !valor) return;
 
-                    if (id) { // Editando
+                    if (id) {
                         const index = catalogoServicos.findIndex(s => s.id === id);
                         catalogoServicos[index] = { id, nome, valor };
                         delete catalogForm.dataset.editingId;
-                    } else { // Novo
+                    } else { 
                         catalogoServicos.push({ id: Date.now(), nome, valor });
                     }
-                    
                     saveCatalogo();
                     updateUI();
                     catalogForm.reset();
@@ -912,13 +1388,13 @@
 
                 catalogList.addEventListener('click', (e) => {
                     const id = parseInt(e.target.dataset.id);
-                    if (e.target.classList.contains('delete-servico-btn')) {
+                    if (e.target.matches('.delete-servico-btn')) {
                         if (confirm('Tem certeza?')) {
                             catalogoServicos = catalogoServicos.filter(s => s.id !== id);
                             saveCatalogo();
                             updateUI();
                         }
-                    } else if (e.target.classList.contains('edit-servico-btn')) {
+                    } else if (e.target.matches('.edit-servico-btn')) {
                         const servico = catalogoServicos.find(s => s.id === id);
                         servicoNomeInput.value = servico.nome;
                         servicoValorInput.value = servico.valor;
@@ -929,18 +1405,12 @@
                 // Listeners de Metas
                 metaForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const nome = metaNomeInput.value.trim();
-                    const valorTotal = parseValue(metaValorTotalInput.value);
-
-                    if (!nome || !valorTotal) return;
-
                     metas.push({
                         id: Date.now(),
-                        nome,
-                        valorTotal,
+                        nome: metaNomeInput.value.trim(),
+                        valorTotal: parseValue(metaValorTotalInput.value),
                         valorGuardado: 0,
                     });
-
                     saveMetas();
                     renderMetas();
                     metaForm.reset();
@@ -949,14 +1419,13 @@
                 metaList.addEventListener('click', (e) => {
                     const id = parseInt(e.target.dataset.id);
                     if (e.target.matches('.delete-meta-btn')) {
-                        if(confirm('Tem certeza que deseja excluir esta meta?')) {
+                        if(confirm('Tem certeza?')) {
                             metas = metas.filter(m => m.id !== id);
                             saveMetas();
                             renderMetas();
                         }
                     } else if (e.target.matches('.add-valor-btn')) {
-                        const valorAdicionalStr = prompt('Quanto você deseja adicionar a esta meta?');
-                        const valorAdicional = parseValue(valorAdicionalStr);
+                        const valorAdicional = parseValue(prompt('Quanto você deseja adicionar a esta meta?'));
                         if(valorAdicional > 0) {
                             const index = metas.findIndex(m => m.id === id);
                             metas[index].valorGuardado += valorAdicional;
@@ -966,32 +1435,65 @@
                     }
                 });
 
+                // Listeners de Clientes
+                addClienteBtn.addEventListener('click', () => openClienteModal());
+                closeClienteModalBtn.addEventListener('click', () => clienteModal.classList.add('hidden'));
+                editClienteBtn.addEventListener('click', (e) => openClienteModal(parseInt(e.target.dataset.id)));
+                clienteForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const id = parseInt(clienteIdInput.value);
+                    const clienteData = {
+                        nome: clienteNomeInput.value.trim(),
+                        contato: clienteContatoInput.value.trim(),
+                        instagram: clienteInstagramInput.value.trim(),
+                        notas: clienteNotasInput.value.trim(),
+                    };
+                    if(!clienteData.nome) return alert('O nome do cliente é obrigatório.');
+
+                    if(id) {
+                        const index = clientes.findIndex(c => c.id === id);
+                        clientes[index] = {...clientes[index], ...clienteData};
+                    } else {
+                        clientes.push({id: Date.now(), ...clienteData});
+                    }
+                    saveClientes();
+                    renderClientList();
+                    if(id) renderClientDetails(id);
+                    clienteModal.classList.add('hidden');
+                });
+
+                deleteClienteBtn.addEventListener('click', () => {
+                    const id = parseInt(clienteIdInput.value);
+                    if(confirm('Tem certeza que deseja excluir este cliente? Todo o seu histórico será mantido, mas o nome não será mais exibido nos agendamentos.')) {
+                        clientes = clientes.filter(c => c.id !== id);
+                        saveClientes();
+                        selectedClientId = null;
+                        renderClientList();
+                        renderClientDetails(null);
+                        clienteModal.classList.add('hidden');
+                    }
+                });
+
+
                 // Listeners da Agenda
-                toggleToAgendaBtn.addEventListener('click', () => {
-                    financeiroView.classList.add('hidden');
-                    agendaView.classList.remove('hidden');
-                    toggleToAgendaBtn.classList.add('hidden');
-                    toggleToFinanceiroBtn.classList.remove('hidden');
-                    renderCalendario();
-                });
-                toggleToFinanceiroBtn.addEventListener('click', () => {
-                    agendaView.classList.add('hidden');
-                    financeiroView.classList.remove('hidden');
-                    toggleToFinanceiroBtn.classList.add('hidden');
-                    toggleToAgendaBtn.classList.remove('hidden');
-                    updateUI();
-                });
                 closeAgendamentoBtn.addEventListener('click', () => agendamentoModal.classList.add('hidden'));
                 agendamentoForm.addEventListener('submit', handleSaveAgendamento);
                 deleteAgendamentoBtn.addEventListener('click', handleDeleteAgendamento);
                 lancarReceitaBtn.addEventListener('click', handleLancarReceita);
+                lembreteWppBtn.addEventListener('click', handleLembreteWhatsApp);
                 agendamentoServicoSelect.addEventListener('change', handleAgendamentoServicoChange);
+
+                // Listeners de Relatórios
+                generateReportBtn.addEventListener('click', generateReport);
+                printReportBtn.addEventListener('click', () => window.print());
 
                 // Listeners de Backup/Restore
                 backupBtn.addEventListener('click', handleBackup);
                 restoreBtn.addEventListener('click', () => restoreFileInput.click());
                 restoreFileInput.addEventListener('change', handleRestore);
 
+                // Estado Inicial
+                switchView(financeiroView);
                 setTransactionType('receita');
                 updateUI();
             };
@@ -1001,6 +1503,3 @@
     </script>
 </body>
 </html>
-
-
-
