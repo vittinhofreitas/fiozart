@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" type="imagex/png" href="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0">
     <!-- CDN do FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script>
@@ -110,12 +109,15 @@
     <!-- Cabeçalho -->
     <header class="bg-brand-bg-light/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm p-4 print:hidden">
         <div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 cursor-pointer" id="logo-container">
                 <img src="https://lh3.googleusercontent.com/pw/AP1GczNl9v7hV_OTYYB2EH-_MAv5NKlYbowCoalKvFaolRxC7wDO6TzrB2A9jrn3E74sK5mf9Vl8x7eO8pukFYGnpWEdidpTVtLHCLA-kEfhYb1FdsDTdFvZJa8cUP3KP5Wg2flK7KfwukGLyXycjbdXtOrwgA=w607-h607-s-no-gm?authuser=0" alt="Logo Fiozart" class="h-10 w-auto" id="logo-img">
                 <h1 class="text-xl md:text-2xl font-bold text-brand-dark">Gestão Fiozart</h1>
             </div>
 
             <div class="flex items-center gap-2 flex-wrap">
+                 <button id="toggleToDashboard" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Dashboard
+                </button>
                  <button id="toggleToFinanceiro" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Financeiro
                 </button>
@@ -124,6 +126,9 @@
                 </button>
                 <button id="toggleToClientes" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Clientes
+                </button>
+                <button id="toggleToEstoque" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
+                    Estoque
                 </button>
                  <button id="toggleToRelatorios" class="text-sm md:text-base bg-brand-primary text-white font-semibold py-2 px-3 md:px-4 rounded-lg hover:bg-brand-dark transition-all">
                     Relatórios
@@ -142,8 +147,57 @@
     <!-- Conteúdo Principal -->
     <main class="container mx-auto p-4 md:p-6">
         
-        <!-- VISÃO FINANCEIRA (INICIAL) -->
-        <div id="financeiroView">
+        <!-- VISÃO DO DASHBOARD -->
+        <div id="dashboardView">
+            <h1 class="text-3xl font-bold text-brand-dark mb-6">Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Coluna Esquerda -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Resumo Financeiro -->
+                    <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-lg font-semibold text-gray-500">Receita do Mês</h3>
+                            <p id="dashboard-receita-mes" class="text-3xl font-bold text-green-600 mt-2">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-lg font-semibold text-gray-500">Despesa do Mês</h3>
+                            <p id="dashboard-despesa-mes" class="text-3xl font-bold text-red-600 mt-2">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md border-2 border-brand-primary">
+                            <h3 class="text-lg font-semibold text-gray-500">Lucro do Mês</h3>
+                            <p id="dashboard-lucro-mes" class="text-3xl font-bold text-brand-dark mt-2">R$ 0,00</p>
+                        </div>
+                    </section>
+                    <!-- Agenda do Dia -->
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-xl font-bold mb-4 border-b pb-3">Agenda do Dia</h2>
+                        <div id="dashboard-agenda-dia" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Agendamentos do dia aqui -->
+                        </div>
+                    </section>
+                </div>
+                <!-- Coluna Direita -->
+                <div class="space-y-6">
+                     <!-- Alertas de Estoque -->
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                         <h2 class="text-xl font-bold mb-4 border-b pb-3">Alertas de Estoque</h2>
+                         <div id="dashboard-estoque-alertas" class="space-y-2">
+                             <!-- Alertas de estoque baixo aqui -->
+                         </div>
+                    </section>
+                     <!-- Aniversariantes -->
+                    <section class="bg-white p-6 rounded-xl shadow-md">
+                         <h2 class="text-xl font-bold mb-4 border-b pb-3">Aniversariantes do Mês</h2>
+                         <div id="dashboard-aniversariantes" class="space-y-3 max-h-80 overflow-y-auto">
+                             <!-- Aniversariantes do mês aqui -->
+                         </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISÃO FINANCEIRA (OCULTA) -->
+        <div id="financeiroView" class="hidden">
             <!-- Cards de Resumo -->
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white p-6 rounded-xl shadow-md">
@@ -265,9 +319,13 @@
             <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Coluna da Lista de Clientes -->
                 <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md">
-                    <div class="flex justify-between items-center mb-4 border-b pb-3">
+                    <div class="flex flex-wrap justify-between items-center mb-4 border-b pb-3 gap-2">
                          <h2 class="text-xl font-bold">Seus Clientes</h2>
-                         <button id="addClienteBtn" class="bg-brand-primary text-white font-bold py-2 px-3 rounded-lg hover:bg-brand-dark text-sm">Novo +</button>
+                         <div class="flex items-center gap-2">
+                            <button id="importClientBtn" class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300">Importar</button>
+                            <input type="file" id="importClientFile" class="hidden" accept=".csv">
+                            <button id="addClienteBtn" class="bg-brand-primary text-white font-bold py-2 px-3 rounded-lg hover:bg-brand-dark text-sm">Novo +</button>
+                         </div>
                     </div>
                     <div id="client-list" class="space-y-2 max-h-[600px] overflow-y-auto">
                         <!-- Lista de clientes será populada aqui -->
@@ -303,6 +361,29 @@
                 </div>
             </section>
         </div>
+        
+        <!-- VISÃO DE ESTOQUE (OCULTA) -->
+        <div id="estoqueView" class="hidden">
+            <section class="bg-white p-6 rounded-xl shadow-md">
+                <div class="flex flex-wrap justify-between items-center mb-4 border-b pb-3 gap-4">
+                     <h2 class="text-xl font-bold">Controle de Estoque</h2>
+                     <div class="flex items-center gap-2">
+                        <button id="filterEstoqueBaixoBtn" class="text-sm bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md hover:bg-yellow-200">Estoque Baixo</button>
+                        <button id="filterEstoqueTodosBtn" class="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md hover:bg-gray-300">Todos</button>
+                        <button id="addProdutoBtn" class="bg-brand-primary text-white font-bold py-2 px-3 rounded-lg hover:bg-brand-dark text-sm">Novo Produto +</button>
+                     </div>
+                </div>
+
+                <!-- Alertas de Estoque Baixo -->
+                <div id="estoque-alerts" class="mb-4 space-y-2"></div>
+
+                <!-- Lista de Produtos -->
+                <div id="product-list" class="space-y-2">
+                    <!-- Lista de produtos será populada aqui -->
+                </div>
+            </section>
+        </div>
+
 
         <!-- VISÃO DE RELATÓRIOS (OCULTA) -->
         <div id="relatoriosView" class="hidden">
@@ -472,7 +553,11 @@
                 </div>
                 <div>
                     <label for="cliente-contato" class="block text-sm font-medium">Telefone / WhatsApp</label>
-                    <input type="text" id="cliente-contato" placeholder="5586999991234" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="text" id="cliente-contato" placeholder="Ex: 86999998888" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                 <div>
+                    <label for="cliente-nascimento" class="block text-sm font-medium">Data de Nascimento (opcional)</label>
+                    <input type="date" id="cliente-nascimento" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div>
                     <label for="cliente-instagram" class="block text-sm font-medium">Instagram (opcional)</label>
@@ -485,6 +570,45 @@
                 <div class="flex flex-col sm:flex-row-reverse gap-3 pt-4">
                     <button type="submit" class="w-full sm:w-auto bg-brand-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-brand-dark">Salvar Cliente</button>
                     <button type="button" id="deleteClienteBtn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 hidden">Excluir Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar/Editar Produto (Estoque) -->
+    <div id="produtoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h2 class="text-xl font-bold" id="produtoModalTitle">Adicionar Novo Produto</h2>
+                <button id="closeProdutoModalBtn" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <form id="produto-form" class="space-y-4">
+                <input type="hidden" id="produtoId">
+                <div>
+                    <label for="produto-nome" class="block text-sm font-medium">Nome do Produto</label>
+                    <input type="text" id="produto-nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div>
+                    <label for="produto-fornecedor" class="block text-sm font-medium">Fornecedor (opcional)</label>
+                    <input type="text" id="produto-fornecedor" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                     <div>
+                        <label for="produto-custo" class="block text-sm font-medium">Custo (R$)</label>
+                        <input type="text" inputmode="decimal" id="produto-custo" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="produto-qtd" class="block text-sm font-medium">Qtd. Atual</label>
+                        <input type="number" id="produto-qtd" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                     <div>
+                        <label for="produto-qtd-min" class="block text-sm font-medium">Qtd. Mínima</label>
+                        <input type="number" id="produto-qtd-min" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row-reverse gap-3 pt-4">
+                    <button type="submit" class="w-full sm:w-auto bg-brand-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-brand-dark">Salvar Produto</button>
+                    <button type="button" id="deleteProdutoBtn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 hidden">Excluir Produto</button>
                 </div>
             </form>
         </div>
@@ -527,14 +651,27 @@
             const metaList = document.getElementById('meta-list');
 
             // Navegação entre Views
+            const logoContainer = document.getElementById('logo-container');
+            const toggleToDashboardBtn = document.getElementById('toggleToDashboard');
             const toggleToFinanceiroBtn = document.getElementById('toggleToFinanceiro');
             const toggleToAgendaBtn = document.getElementById('toggleToAgenda');
             const toggleToClientesBtn = document.getElementById('toggleToClientes');
+            const toggleToEstoqueBtn = document.getElementById('toggleToEstoque');
             const toggleToRelatoriosBtn = document.getElementById('toggleToRelatorios');
+            const dashboardView = document.getElementById('dashboardView');
             const financeiroView = document.getElementById('financeiroView');
             const agendaView = document.getElementById('agendaView');
             const clientesView = document.getElementById('clientesView');
+            const estoqueView = document.getElementById('estoqueView');
             const relatoriosView = document.getElementById('relatoriosView');
+
+            // Dashboard
+            const dashboardReceitaEl = document.getElementById('dashboard-receita-mes');
+            const dashboardDespesaEl = document.getElementById('dashboard-despesa-mes');
+            const dashboardLucroEl = document.getElementById('dashboard-lucro-mes');
+            const dashboardAgendaEl = document.getElementById('dashboard-agenda-dia');
+            const dashboardEstoqueEl = document.getElementById('dashboard-estoque-alertas');
+            const dashboardAniversariantesEl = document.getElementById('dashboard-aniversariantes');
 
             // Agendamento
             const calendarioEl = document.getElementById('calendario');
@@ -555,6 +692,8 @@
             const lembreteWppBtn = document.getElementById('lembreteWppBtn');
 
             // Clientes (CRM)
+            const importClientBtn = document.getElementById('importClientBtn');
+            const importClientFile = document.getElementById('importClientFile');
             const addClienteBtn = document.getElementById('addClienteBtn');
             const clientListEl = document.getElementById('client-list');
             const clientDetailsPlaceholder = document.getElementById('client-details-placeholder');
@@ -572,9 +711,28 @@
             const clienteIdInput = document.getElementById('clienteId');
             const clienteNomeInput = document.getElementById('cliente-nome');
             const clienteContatoInput = document.getElementById('cliente-contato');
+            const clienteNascimentoInput = document.getElementById('cliente-nascimento');
             const clienteInstagramInput = document.getElementById('cliente-instagram');
             const clienteNotasInput = document.getElementById('cliente-notas');
             const deleteClienteBtn = document.getElementById('deleteClienteBtn');
+
+            // Estoque
+            const addProdutoBtn = document.getElementById('addProdutoBtn');
+            const productListEl = document.getElementById('product-list');
+            const estoqueAlertsEl = document.getElementById('estoque-alerts');
+            const produtoModal = document.getElementById('produtoModal');
+            const closeProdutoModalBtn = document.getElementById('closeProdutoModalBtn');
+            const produtoModalTitle = document.getElementById('produtoModalTitle');
+            const produtoForm = document.getElementById('produto-form');
+            const produtoIdInput = document.getElementById('produtoId');
+            const produtoNomeInput = document.getElementById('produto-nome');
+            const produtoFornecedorInput = document.getElementById('produto-fornecedor');
+            const produtoCustoInput = document.getElementById('produto-custo');
+            const produtoQtdInput = document.getElementById('produto-qtd');
+            const produtoQtdMinInput = document.getElementById('produto-qtd-min');
+            const deleteProdutoBtn = document.getElementById('deleteProdutoBtn');
+            const filterEstoqueBaixoBtn = document.getElementById('filterEstoqueBaixoBtn');
+            const filterEstoqueTodosBtn = document.getElementById('filterEstoqueTodosBtn');
 
             // Relatórios
             const reportStartDateInput = document.getElementById('report-start-date');
@@ -600,6 +758,7 @@
             let agendamentos = JSON.parse(localStorage.getItem('fiozart_agendamentos')) || [];
             let metas = JSON.parse(localStorage.getItem('fiozart_metas')) || [];
             let clientes = JSON.parse(localStorage.getItem('fiozart_clientes')) || [];
+            let estoque = JSON.parse(localStorage.getItem('fiozart_estoque')) || [];
             let transactionType = 'receita';
             let selectedClientId = null;
             let fluxoCaixaChart, despesasChart, calendar, reportFaturamentoChart, reportDespesasChart;
@@ -608,6 +767,19 @@
             const formatCurrency = (value) => parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const parseValue = (value) => parseFloat(String(value).replace(',', '.')) || 0;
             const formatDate = (dateString) => new Date(dateString + 'T00:00:00-03:00').toLocaleDateString('pt-BR');
+            const formatPhoneNumberForWhatsApp = (phone) => {
+                if (!phone) return null;
+                const digitsOnly = phone.replace(/\D/g, '');
+                if (digitsOnly.length === 10 || digitsOnly.length === 11) {
+                    return `55${digitsOnly}`;
+                }
+                if (digitsOnly.length === 12 || digitsOnly.length === 13) {
+                    if (digitsOnly.startsWith('55')) {
+                        return digitsOnly;
+                    }
+                }
+                return null; // Formato inválido ou não suportado
+            };
 
             // --- FUNÇÕES DE ARMAZENAMENTO ---
             const saveTransactions = () => localStorage.setItem('fiozart_transactions', JSON.stringify(transactions));
@@ -615,17 +787,20 @@
             const saveAgendamentos = () => localStorage.setItem('fiozart_agendamentos', JSON.stringify(agendamentos));
             const saveMetas = () => localStorage.setItem('fiozart_metas', JSON.stringify(metas));
             const saveClientes = () => localStorage.setItem('fiozart_clientes', JSON.stringify(clientes));
+            const saveEstoque = () => localStorage.setItem('fiozart_estoque', JSON.stringify(estoque));
             
             // --- LÓGICA DE NAVEGAÇÃO ---
             const switchView = (viewToShow) => {
-                [financeiroView, agendaView, clientesView, relatoriosView].forEach(view => view.classList.add('hidden'));
+                [dashboardView, financeiroView, agendaView, clientesView, relatoriosView, estoqueView].forEach(view => view.classList.add('hidden'));
                 viewToShow.classList.remove('hidden');
-
+                
+                if(viewToShow === dashboardView) renderDashboard();
                 if(viewToShow === agendaView) renderCalendario();
                 if(viewToShow === clientesView) {
                     renderClientList();
                     renderClientDetails(selectedClientId);
                 }
+                 if(viewToShow === estoqueView) renderEstoqueList();
                 if(viewToShow === financeiroView) updateUI();
                 if(viewToShow === relatoriosView) {
                      const today = new Date();
@@ -635,6 +810,82 @@
                      generateReport();
                 }
             };
+
+            // --- LÓGICA DO DASHBOARD ---
+            const renderDashboard = () => {
+                // 1. Resumo Financeiro
+                const hoje = new Date();
+                const mesAtual = hoje.getMonth();
+                const anoAtual = hoje.getFullYear();
+                const transactionsDoMes = transactions.filter(t => {
+                    const dataT = new Date(t.date);
+                    return dataT.getMonth() === mesAtual && dataT.getFullYear() === anoAtual;
+                });
+                const receitas = transactionsDoMes.filter(t => t.type === 'receita').reduce((acc, t) => acc + t.amount, 0);
+                const despesas = transactionsDoMes.filter(t => t.type === 'despesa').reduce((acc, t) => acc + t.amount, 0);
+                dashboardReceitaEl.textContent = formatCurrency(receitas);
+                dashboardDespesaEl.textContent = formatCurrency(Math.abs(despesas));
+                dashboardLucroEl.textContent = formatCurrency(receitas + despesas);
+
+                // 2. Agenda do Dia
+                const hojeStr = hoje.toISOString().split('T')[0];
+                const agendamentosHoje = agendamentos.filter(ag => ag.data === hojeStr).sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+                dashboardAgendaEl.innerHTML = '';
+                if (agendamentosHoje.length === 0) {
+                    dashboardAgendaEl.innerHTML = '<p class="text-center text-gray-500">Nenhum agendamento para hoje.</p>';
+                } else {
+                    agendamentosHoje.forEach(ag => {
+                        const cliente = clientes.find(c => c.id === ag.clienteId);
+                        const div = document.createElement('div');
+                        div.className = 'p-3 border-l-4 rounded-r-lg border-brand-primary';
+                        div.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <p class="font-bold">${ag.horaInicio} - ${cliente ? cliente.nome : 'Cliente Apagado'}</p>
+                                <p class="text-sm">${ag.servicoNome}</p>
+                            </div>
+                        `;
+                        dashboardAgendaEl.appendChild(div);
+                    });
+                }
+                
+                // 3. Alertas de Estoque
+                const produtosComEstoqueBaixo = estoque.filter(p => p.qtd <= p.qtdMin);
+                dashboardEstoqueEl.innerHTML = '';
+                if (produtosComEstoqueBaixo.length === 0) {
+                     dashboardEstoqueEl.innerHTML = '<p class="text-center text-gray-500">Nenhum alerta de estoque.</p>';
+                } else {
+                    produtosComEstoqueBaixo.forEach(p => {
+                         const div = document.createElement('div');
+                         div.className = 'p-2 bg-yellow-100 text-yellow-800 rounded-md text-sm';
+                         div.innerHTML = `<span class="font-bold">${p.nome}:</span> Restam apenas ${p.qtd} unidades.`;
+                         dashboardEstoqueEl.appendChild(div);
+                    });
+                }
+                
+                // 4. Aniversariantes do Mês
+                const aniversariantesDoMes = clientes.filter(c => {
+                    if (!c.nascimento) return false;
+                    const niverMes = new Date(c.nascimento).getMonth();
+                    return niverMes === mesAtual;
+                }).sort((a,b) => new Date(a.nascimento).getDate() - new Date(b.nascimento).getDate());
+                
+                dashboardAniversariantesEl.innerHTML = '';
+                if(aniversariantesDoMes.length === 0) {
+                    dashboardAniversariantesEl.innerHTML = '<p class="text-center text-gray-500">Nenhum aniversariante este mês.</p>';
+                } else {
+                     aniversariantesDoMes.forEach(c => {
+                         const diaNiver = new Date(c.nascimento + 'T00:00:00-03:00').toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+                         const div = document.createElement('div');
+                         div.className = 'flex justify-between items-center p-2';
+                         div.innerHTML = `
+                            <p>${c.nome}</p>
+                            <p class="font-bold text-brand-primary">${diaNiver}</p>
+                         `;
+                         dashboardAniversariantesEl.appendChild(div);
+                     });
+                }
+            };
+
 
             // --- LÓGICA DE CATÁLOGO ---
             const popularCatalogoNoForm = (selectElement) => {
@@ -834,6 +1085,7 @@
                     clienteIdInput.value = cliente.id;
                     clienteNomeInput.value = cliente.nome;
                     clienteContatoInput.value = cliente.contato;
+                    clienteNascimentoInput.value = cliente.nascimento;
                     clienteInstagramInput.value = cliente.instagram;
                     clienteNotasInput.value = cliente.notas;
                     deleteClienteBtn.classList.remove('hidden');
@@ -852,6 +1104,116 @@
                     option.textContent = cliente.nome;
                     agendamentoClienteSelect.appendChild(option);
                 });
+            };
+            
+            const handleImportClientes = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const csv = e.target.result;
+                        const lines = csv.split('\n').slice(1); // Ignora o cabeçalho
+                        let newClientsCount = 0;
+                        lines.forEach(line => {
+                            if (line.trim() === '') return;
+                            const [nome, contato, instagram, notas, nascimento] = line.split(',');
+                            
+                            const existingClient = clientes.find(c => c.contato && c.contato.replace(/\D/g, '') === contato.replace(/\D/g, ''));
+                            if (!existingClient) {
+                                clientes.push({
+                                    id: Date.now() + newClientsCount,
+                                    nome: nome.trim(),
+                                    contato: contato.trim(),
+                                    instagram: instagram.trim(),
+                                    notas: notas.trim(),
+                                    nascimento: nascimento.trim()
+                                });
+                                newClientsCount++;
+                            }
+                        });
+                        if (newClientsCount > 0) {
+                            saveClientes();
+                            renderClientList();
+                            alert(`${newClientsCount} novo(s) cliente(s) importado(s) com sucesso!`);
+                        } else {
+                            alert('Nenhum novo cliente para importar ou os contatos já existem.');
+                        }
+                    } catch(error) {
+                        alert('Erro ao importar o arquivo. Verifique se ele está no formato CSV correto (Nome,Telefone,Instagram,Notas,Nascimento).');
+                        console.error("Erro na importação:", error);
+                    } finally {
+                        importClientFile.value = '';
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            // --- LÓGICA DE ESTOQUE ---
+            const renderEstoqueList = (filter = 'todos') => {
+                 const produtosFiltrados = (filter === 'baixo') ? estoque.filter(p => p.qtd <= p.qtdMin) : estoque;
+
+                productListEl.innerHTML = '';
+                estoqueAlertsEl.innerHTML = '';
+                
+                const produtosComEstoqueBaixo = estoque.filter(p => p.qtd <= p.qtdMin);
+                if (produtosComEstoqueBaixo.length > 0) {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md';
+                    const productNames = produtosComEstoqueBaixo.map(p => p.nome).join(', ');
+                    alertDiv.innerHTML = `<p><span class="font-bold">Atenção:</span> Os seguintes produtos estão com estoque baixo: ${productNames}.</p>`;
+                    estoqueAlertsEl.appendChild(alertDiv);
+                }
+
+                 if (produtosFiltrados.length === 0) {
+                    productListEl.innerHTML = `<p class="text-center text-gray-500 p-4">${filter === 'baixo' ? 'Nenhum produto com estoque baixo.' : 'Nenhum produto cadastrado.'}</p>`;
+                    return;
+                }
+
+                produtosFiltrados.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(p => {
+                    const isLow = p.qtd <= p.qtdMin;
+                    const div = document.createElement('div');
+                    div.className = `p-3 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-4 items-center ${isLow ? 'bg-red-50 border border-red-200' : 'border'}`;
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold">${p.nome}</p>
+                            <p class="text-sm text-gray-500">${p.fornecedor || 'Sem fornecedor'}</p>
+                        </div>
+                        <div class="text-center">
+                             <p class="text-2xl font-bold ${isLow ? 'text-red-600' : 'text-brand-dark'}">${p.qtd}</p>
+                             <p class="text-xs text-gray-500">em estoque</p>
+                        </div>
+                        <div class="flex items-center justify-center gap-2">
+                            <button data-id="${p.id}" class="adjust-qty-btn bg-gray-200 text-gray-800 rounded-full w-8 h-8 font-bold text-lg hover:bg-gray-300" data-amount="-1">-</button>
+                            <button data-id="${p.id}" class="adjust-qty-btn bg-gray-200 text-gray-800 rounded-full w-8 h-8 font-bold text-lg hover:bg-gray-300" data-amount="1">+</button>
+                        </div>
+                        <div class="text-right">
+                             <button data-id="${p.id}" class="edit-produto-btn text-sm text-blue-600 hover:underline">Editar</button>
+                        </div>
+                    `;
+                    productListEl.appendChild(div);
+                });
+            };
+
+            const openProdutoModal = (produtoId = null) => {
+                produtoForm.reset();
+                deleteProdutoBtn.classList.add('hidden');
+                if(produtoId) {
+                    const produto = estoque.find(p => p.id === produtoId);
+                    produtoModalTitle.textContent = "Editar Produto";
+                    produtoIdInput.value = produto.id;
+                    produtoNomeInput.value = produto.nome;
+                    produtoFornecedorInput.value = produto.fornecedor;
+                    produtoCustoInput.value = produto.custo;
+                    produtoQtdInput.value = produto.qtd;
+                    produtoQtdMinInput.value = produto.qtdMin;
+                    deleteProdutoBtn.classList.remove('hidden');
+                } else {
+                    produtoModalTitle.textContent = "Adicionar Novo Produto";
+                    produtoIdInput.value = '';
+                }
+                produtoModal.classList.remove('hidden');
             };
 
             // --- LÓGICA DE AGENDAMENTO ---
@@ -1024,13 +1386,17 @@
                 const cliente = clientes.find(c => c.id === clienteId);
                 if (!cliente || !cliente.contato) return alert('O cliente não tem um número de contato salvo. Adicione o número na aba "Clientes".');
 
-                const numero = cliente.contato.replace(/\D/g, ''); // Remove caracteres não numéricos
+                const numeroFormatado = formatPhoneNumberForWhatsApp(cliente.contato);
+                if (!numeroFormatado) {
+                    return alert('O número de telefone do cliente parece estar em um formato inválido. Corrija na aba "Clientes". Ex: 86999998888');
+                }
+
                 const nomeCliente = cliente.nome.split(' ')[0]; // Pega só o primeiro nome
                 const dataAgendamento = formatDate(agendamento.data);
                 const horaAgendamento = agendamento.horaInicio;
 
                 const texto = `Olá, ${nomeCliente}! Passando para confirmar seu horário na Fiozart amanhã, dia ${dataAgendamento} às ${horaAgendamento}. Podemos confirmar?`;
-                const linkWhatsApp = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+                const linkWhatsApp = `https://wa.me/${numeroFormatado}?text=${encodeURIComponent(texto)}`;
 
                 window.open(linkWhatsApp, '_blank');
             };
@@ -1246,7 +1612,7 @@
                            <p class="text-sm text-gray-500">${data.count} vez(es)</p>
                         </div>
                     </div>
-                `).join('');
+                `).join('') || '<p class="text-gray-500">Nenhum serviço realizado no período.</p>';
 
 
                 // 4. Ranking de Clientes
@@ -1268,7 +1634,7 @@
                            <p class="text-sm text-gray-500">${data.count} agendamento(s)</p>
                         </div>
                     </div>
-                `}).join('');
+                `}).join('') || '<p class="text-gray-500">Nenhum cliente atendido no período.</p>';
 
                 // 5. Gráfico Despesas
                 const reportDespesas = filteredTransactions.filter(t => t.type === 'despesa');
@@ -1298,7 +1664,7 @@
             // --- LÓGICA DE BACKUP/RESTORE ---
             const handleBackup = () => {
                 const allData = {
-                    transactions, catalogoServicos, agendamentos, metas, clientes
+                    transactions, catalogoServicos, agendamentos, metas, clientes, estoque
                 };
 
                 const dataStr = JSON.stringify(allData, null, 2);
@@ -1322,7 +1688,7 @@
                 reader.onload = (e) => {
                     try {
                         const importedData = JSON.parse(e.target.result);
-                        const requiredKeys = ['transactions', 'catalogoServicos', 'agendamentos', 'metas', 'clientes'];
+                        const requiredKeys = ['transactions', 'catalogoServicos', 'agendamentos', 'metas', 'clientes', 'estoque'];
                         const hasAllKeys = requiredKeys.every(key => key in importedData);
                         
                         if (hasAllKeys) {
@@ -1332,6 +1698,7 @@
                                 localStorage.setItem('fiozart_agendamentos', JSON.stringify(importedData.agendamentos || []));
                                 localStorage.setItem('fiozart_metas', JSON.stringify(importedData.metas || []));
                                 localStorage.setItem('fiozart_clientes', JSON.stringify(importedData.clientes || []));
+                                localStorage.setItem('fiozart_estoque', JSON.stringify(importedData.estoque || []));
                                 
                                 alert('Backup restaurado com sucesso! A página será recarregada.');
                                 location.reload();
@@ -1354,9 +1721,12 @@
                 window.deleteTransaction = deleteTransaction;
 
                 // Listeners de Navegação
+                logoContainer.addEventListener('click', () => switchView(dashboardView));
+                toggleToDashboardBtn.addEventListener('click', () => switchView(dashboardView));
                 toggleToFinanceiroBtn.addEventListener('click', () => switchView(financeiroView));
                 toggleToAgendaBtn.addEventListener('click', () => switchView(agendaView));
                 toggleToClientesBtn.addEventListener('click', () => switchView(clientesView));
+                toggleToEstoqueBtn.addEventListener('click', () => switchView(estoqueView));
                 toggleToRelatoriosBtn.addEventListener('click', () => switchView(relatoriosView));
 
                 // Listeners financeiros
@@ -1439,6 +1809,8 @@
                 });
 
                 // Listeners de Clientes
+                importClientBtn.addEventListener('click', () => importClientFile.click());
+                importClientFile.addEventListener('change', handleImportClientes);
                 addClienteBtn.addEventListener('click', () => openClienteModal());
                 closeClienteModalBtn.addEventListener('click', () => clienteModal.classList.add('hidden'));
                 editClienteBtn.addEventListener('click', (e) => openClienteModal(parseInt(e.target.dataset.id)));
@@ -1448,6 +1820,7 @@
                     const clienteData = {
                         nome: clienteNomeInput.value.trim(),
                         contato: clienteContatoInput.value.trim(),
+                        nascimento: clienteNascimentoInput.value,
                         instagram: clienteInstagramInput.value.trim(),
                         notas: clienteNotasInput.value.trim(),
                     };
@@ -1477,6 +1850,61 @@
                     }
                 });
 
+                // Listeners de Estoque
+                addProdutoBtn.addEventListener('click', () => openProdutoModal());
+                closeProdutoModalBtn.addEventListener('click', () => produtoModal.classList.add('hidden'));
+                produtoForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const id = parseInt(produtoIdInput.value);
+                    const produtoData = {
+                        nome: produtoNomeInput.value.trim(),
+                        fornecedor: produtoFornecedorInput.value.trim(),
+                        custo: parseValue(produtoCustoInput.value),
+                        qtd: parseInt(produtoQtdInput.value),
+                        qtdMin: parseInt(produtoQtdMinInput.value),
+                    };
+
+                    if(!produtoData.nome || isNaN(produtoData.custo) || isNaN(produtoData.qtd) || isNaN(produtoData.qtdMin)) {
+                        return alert('Por favor, preencha todos os campos obrigatórios do produto.');
+                    }
+                    
+                    if(id) {
+                        const index = estoque.findIndex(p => p.id === id);
+                        estoque[index] = {...estoque[index], ...produtoData};
+                    } else {
+                        estoque.push({id: Date.now(), ...produtoData});
+                    }
+                    saveEstoque();
+                    renderEstoqueList();
+                    produtoModal.classList.add('hidden');
+                });
+                
+                deleteProdutoBtn.addEventListener('click', () => {
+                     const id = parseInt(produtoIdInput.value);
+                     if(confirm('Tem certeza que deseja excluir este produto?')) {
+                         estoque = estoque.filter(p => p.id !== id);
+                         saveEstoque();
+                         renderEstoqueList();
+                         produtoModal.classList.add('hidden');
+                     }
+                });
+                
+                productListEl.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    if(e.target.matches('.edit-produto-btn')) {
+                        openProdutoModal(id);
+                    } else if (e.target.matches('.adjust-qty-btn')) {
+                        const amount = parseInt(e.target.dataset.amount);
+                        const index = estoque.findIndex(p => p.id === id);
+                        estoque[index].qtd += amount;
+                        if(estoque[index].qtd < 0) estoque[index].qtd = 0;
+                        saveEstoque();
+                        renderEstoqueList();
+                    }
+                });
+                filterEstoqueBaixoBtn.addEventListener('click', () => renderEstoqueList('baixo'));
+                filterEstoqueTodosBtn.addEventListener('click', () => renderEstoqueList('todos'));
+
 
                 // Listeners da Agenda
                 closeAgendamentoBtn.addEventListener('click', () => agendamentoModal.classList.add('hidden'));
@@ -1496,9 +1924,8 @@
                 restoreFileInput.addEventListener('change', handleRestore);
 
                 // Estado Inicial
-                switchView(financeiroView);
+                switchView(dashboardView);
                 setTransactionType('receita');
-                updateUI();
             };
 
             init();
@@ -1506,3 +1933,4 @@
     </script>
 </body>
 </html>
+
